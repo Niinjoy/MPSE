@@ -193,8 +193,9 @@ def get_reward(case,iteration,inputeq,ani = 0):
     r_max_ini = np.max(r)
     pew_ini = pew[:]
 
-    fig = plt.figure()
-    fig.canvas.mpl_connect('close_event', handle_close)
+    if ani != 0:
+        fig = plt.figure()
+        fig.canvas.mpl_connect('close_event', handle_close)
 
     it = 0 #iteration number
     while it < iteration:
@@ -205,10 +206,9 @@ def get_reward(case,iteration,inputeq,ani = 0):
             plt.plot(ppw[:,0],ppw[:,1],marker="o", lw = 0, markersize=4, mec = 'c', mfc = 'g', mew = 0.3)
             plt.plot(pew[0],pew[1], marker="o",  markersize=4, mec = 'b', c = 'k',mew = 0.3)
             plt.pause(0.001)
-
-        danger_num = len(r[r<dc+ti*(vem+vpm)])
-        if danger_num !=0 and ani != 0:
-            print(danger_num)
+            danger_num = len(r[r<dc+ti*(vem+vpm)])
+            if danger_num !=0:
+                print(danger_num)
 
         #pursuer strategy
         vp_sort = vpeq(r_sort, alpha_sort, theta_sort, epsilon_sort, vpm_sort, m, k)
@@ -235,14 +235,22 @@ def get_reward(case,iteration,inputeq,ani = 0):
         if (np.max(epsilon_sort)>1.5 and np.min(r)>4*dc) or np.linalg.norm(pew-pew_ini)>r_max_ini*1.5 :
             # print('escaped!')
             break
-    if ani != 0:
-        # plt.plot(ppw[:,0],ppw[:,1],'or')
-        # plt.plot(pew[0],pew[1],'ok')
-        plt.show()
     if it == iteration or it < 5:
         print(pew,ppw,epsilon_sort[index_reverse])
     #     it = iteration
     # it = it
+    danger_num = len(r[r<dc+ti*(vem+vpm)])
+    if danger_num !=0 and ani != 0:
+        print("final:", danger_num)
+    # if danger_num == 1:
+    #     it = it + 2*iteration
+    # if danger_num == 2:
+    #     it = it + 1*iteration
+
+    if ani != 0:
+        # plt.plot(ppw[:,0],ppw[:,1],'or')
+        # plt.plot(pew[0],pew[1],'ok')
+        plt.show()
     return(it)
 
 #input

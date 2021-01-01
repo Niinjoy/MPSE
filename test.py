@@ -42,6 +42,17 @@ def testeq(r,tri,dc,ep,ep2,vpm):
     # tri*(dc - r + tri - 3)/((dc - r)*(tri - 3))
     # -tri*(dc + 5*r + tri)/((dc + 6*r)*(r - tri))
     # tri*(-dc + r + 1)/(dc - r)
+
+    # tri*vpm/(ep2*r) + tri/ep
+    # dc**2*tri/(ep2*r) + tri/ep
+    # tri*(dc + r - tri - vpm + 4.81426540705305)
+    # (ep**2 - ep2**2*tri*(3.64148590107594*dc*vpm - dc - ep2 + tri))/ep2**2
+    # tri - 4.60075751819611 + tri*vpm/(ep2*r)
+    # ep + r*tri**2
+    # -dc + r*tri*(-r + tri + 1) + tri*(dc*r + 1)
+    # ep + tri*vpm/(ep2*r)
+    # r*tri*(dc + vpm + 1)
+    # tri*(r + tri + 1)
     return force
 
 #input #todo: change ppw to r alpha, use judge fuction to get that can surround. use seed of generation to have same random number in one generation; todo still has 1000 problem
