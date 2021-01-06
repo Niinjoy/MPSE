@@ -2,15 +2,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-colors=['b','c','g','m','r','y','g','m','r','y'] #color of pursuer
-
 class EvLambda( object ):
     def __init__( self, body ):
         self.body= body
-    def __call__( self, r,tri,dc,ep,ep2):
+    def __call__( self, r,tri,dc,ep,ep2,minr,maxr,avgr,stdr):
         return eval( self.body )
     def __str__( self ):
         return self.body
+
+def veeq(r,alpha,dc,vem,epsilon,vpm,inputeq):
+    "calc ve"
+    force = np.zeros((2,r.shape[0]))
+    force_sum = np.zeros(2)
+    for i in range(2):
+        tri = np.cos(alpha) if i==0 else np.sin(alpha)
+        force[i] = inputeq(r, tri, dc, epsilon, down(epsilon), np.min(r), np.max(r), np.mean(r), np.std(r))
+    force_sum = np.sum(force, axis=1) + np.random.uniform(1e-10, 1e-8, 2) * np.random.choice([-1,1], 2)
+    ve = vem*force_sum/np.linalg.norm(force_sum)
+    return ve
+
+colors=['b','c','g','m','r','y','g','m','r','y'] #color of pursuer
 
 class Case: 
    def __init__(self, pew, ppw, vem, vpm, dc, ti, k, m):
@@ -96,17 +107,6 @@ def forceeq(r,tri,dc):
     "calc force"
     force = - r*tri/((r - 1*dc)**0.9)
     return force
-
-def veeq(r,alpha,dc,vem,epsilon,vpm,inputeq):
-    "calc ve"
-    xforce = inputeq(r,np.cos(alpha),dc,epsilon,down(epsilon))
-    yforce = inputeq(r,np.sin(alpha),dc,epsilon,down(epsilon))
-    xsum = np.sum(xforce) + float(np.random.uniform(1e-10, 1e-8, 1)*np.random.choice([-1,1], 1))
-    ysum = np.sum(yforce) + float(np.random.uniform(1e-10, 1e-8, 1)*np.random.choice([-1,1], 1))
-    vex = vem*xsum/(np.sqrt(xsum**2+ysum**2))
-    vey = vem*ysum/(np.sqrt(xsum**2+ysum**2))
-    ve = np.array([vex, vey])
-    return ve
 
 def surround_judge(pew,ppw,vem,vpm):
     "judge whether surrounded in the initial state"
@@ -303,4 +303,4 @@ if __name__ == '__main__':
     '(dc*r**3*tri + (2.8 - 1.4*tri)*(dc - r))/(dc*r**2*(dc - r))',
     )
     # get_list_escape_rate(lambda_list, 1000)
-    print(escape_test(func=lambda_list[0], loop=100))
+    print(escape_test(func=lambda_list[0], loop=1))
