@@ -1,11 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 import sys
 
-class Case:
-   empCount = 0
- 
+colors=['b','c','g','m','r','y','g','m','r','y'] #color of pursuer
+
+class EvLambda( object ):
+    def __init__( self, body ):
+        self.body= body
+    def __call__( self, r,tri,dc,ep,ep2):
+        return eval( self.body )
+    def __str__( self ):
+        return self.body
+
+class Case: 
    def __init__(self, pew, ppw, vem, vpm, dc, ti, k, m):
       self.pew = pew
       self.ppw = ppw
@@ -92,8 +99,8 @@ def forceeq(r,tri,dc):
 
 def veeq(r,alpha,dc,vem,epsilon,vpm,inputeq):
     "calc ve"
-    xforce = inputeq(r,np.cos(alpha),dc,epsilon,down(epsilon),vpm)
-    yforce = inputeq(r,np.sin(alpha),dc,epsilon,down(epsilon),vpm)
+    xforce = inputeq(r,np.cos(alpha),dc,epsilon,down(epsilon))
+    yforce = inputeq(r,np.sin(alpha),dc,epsilon,down(epsilon))
     xsum = np.sum(xforce) + float(np.random.uniform(1e-10, 1e-8, 1)*np.random.choice([-1,1], 1))
     ysum = np.sum(yforce) + float(np.random.uniform(1e-10, 1e-8, 1)*np.random.choice([-1,1], 1))
     vex = vem*xsum/(np.sqrt(xsum**2+ysum**2))
@@ -116,7 +123,7 @@ def surround_judge(pew,ppw,vem,vpm):
         flag = 1
     return flag
 
-def gen_case(rate = 1):
+def gen_case(rate = 1, k = 1.9, m = 7):
     "generate random case, rate 0 to 1, simple to hard"
     #generate range assign by rate, con for constant
     num_min = 3
@@ -125,7 +132,7 @@ def gen_case(rate = 1):
     num_max = int(round(weight_boundray(num_max_start, num_max_end, rate)))
 
     r_min_start = 60
-    r_min_end = 20
+    r_min_end = 40
     r_min = weight_boundray(r_min_start, r_min_end, rate)
     r_max = 80
 
@@ -152,14 +159,16 @@ def gen_case(rate = 1):
         ppw = np.vstack((x,y)).T
         pew = np.array([0,0]) 
         vem = vem_value
-        vpm = np.random.uniform(vpm_min ,vpm_max, num)
+        vpm = np.random.uniform(vpm_min ,vpm_max, 1) # 1 for the same, num for different
         flag = surround_judge(pew,ppw,vem,vpm)
         if flag == 1:
             break
     dc = np.random.uniform(dc_min,dc_max,1) #capture radius
     ti = 0.01 #time interval
-    k = 1.9 #parameter in beta equation
-    m = 7 #parameter in delta equation
+    if k == 0:
+        k = np.random.uniform(1,2,1) #1.9 #parameter in beta equation
+    if m == 0:
+        m = np.random.uniform(3,7,1) #7 #parameter in delta equation
     case = Case(pew, ppw, vem, vpm, dc, ti, k, m)
     return case
 
@@ -192,23 +201,20 @@ def get_reward(case,iteration,inputeq,ani = 0):
     epsilon_sort = epsiloneq(up(alpha_sort), alpha_sort, up(theta_sort), theta_sort)
     r_max_ini = np.max(r)
     pew_ini = pew[:]
+    danger_dis = dc+ti*(vem+vpm)
 
     if ani != 0:
         fig = plt.figure()
         fig.canvas.mpl_connect('close_event', handle_close)
+        plt.axis('equal')
+        plt.axis([-135, 135, -100, 100])
+        plt.scatter(ppw[:,0], ppw[:,1], marker = "^", s = 15, c = colors[0:num], alpha = 1)
+        plt.scatter(pew[0],pew[1], marker="x",  s=15, c = 'k', alpha = 1)
+        plt.pause(0.001)
 
     it = 0 #iteration number
     while it < iteration:
         it = it + 1
-        if ani != 0:
-            # plt.cla()
-            plt.axis([-100, 100, -100, 100])
-            plt.plot(ppw[:,0],ppw[:,1],marker="o", lw = 0, markersize=4, mec = 'c', mfc = 'g', mew = 0.3)
-            plt.plot(pew[0],pew[1], marker="o",  markersize=4, mec = 'b', c = 'k',mew = 0.3)
-            plt.pause(0.001)
-            danger_num = len(r[r<dc+ti*(vem+vpm)])
-            if danger_num !=0:
-                print(danger_num)
 
         #pursuer strategy
         vp_sort = vpeq(r_sort, alpha_sort, theta_sort, epsilon_sort, vpm_sort, m, k)
@@ -228,45 +234,73 @@ def get_reward(case,iteration,inputeq,ani = 0):
         vpm_sort = vpm[index]
         theta_sort = theta[index]
         epsilon_sort = epsiloneq(up(alpha_sort), alpha_sort, up(theta_sort), theta_sort)
+        danger_num = len(r[r<danger_dis])
+        if danger_num !=0 and ani != 0:
+            print(danger_num)
+        if ani != 0:
+            # plt.cla()
+            plt.axis('equal')
+            plt.axis([-135, 135, -100, 100])
+            plt.scatter(ppw[:,0], ppw[:,1], marker = "o", s = 8, c = colors[0:num], alpha = 0.2)
+            plt.scatter(pew[0],pew[1], marker="o",  s=8, c = 'k', alpha = 0.2)
+            plt.pause(0.001)
+
         if np.min(r)<dc:
             # print('captured!')
             it = iteration*2 - it #make it as reward, the smaller the better
             break
-        if (np.max(epsilon_sort)>1.5 and np.min(r)>4*dc) or np.linalg.norm(pew-pew_ini)>r_max_ini*1.5 :
+        if (np.max(epsilon_sort)>1.2 and np.min(r)>3*dc) or np.linalg.norm(pew-pew_ini)>r_max_ini*1.5 :
             # print('escaped!')
             break
     if it == iteration or it < 5:
         print(pew,ppw,epsilon_sort[index_reverse])
-    #     it = iteration
-    # it = it
-    danger_num = len(r[r<dc+ti*(vem+vpm)])
-    if danger_num !=0 and ani != 0:
-        print("final:", danger_num)
-    # if danger_num == 1:
-    #     it = it + 2*iteration
-    # if danger_num == 2:
-    #     it = it + 1*iteration
 
+    if danger_num != 0 and ani != 0:
+        print(danger_num)
     if ani != 0:
-        # plt.plot(ppw[:,0],ppw[:,1],'or')
-        # plt.plot(pew[0],pew[1],'ok')
         plt.show()
-    return(it)
+    return(it, danger_num)
 
-#input
-pew = np.array([0,0]) #position of evader in world coordination
-ppw = np.array([[40,30],[5,26],[-35,15],[-60,-30],[-20,-60],[20,-60],[60,-10]]) #position of pursuersin world coordination
-vem = 42 #max speed of evader
-vpm = 38 #max speed of pursuers, here set the same, can change to different
+# testeq0 = lambda r,tri,dc,ep,ep2: -r*tri/((r-dc))
 
-#set
-dc = 2 #capture radius
-ti = 0.01 #time interval
-iteration = 1000 #maximun time iteration
-k = 1 #parameter in beta equation
-m = 6 #parameter in delta equation
+def escape_test(func, loop = 1000, rate = 1, iteration = 1000, k = 1.9, m = 7):
+    "test the escape rate"
+    # func_vec = np.vectorize(func)
+    escape = 0
+    danger_num_1 = 0 # number of danger_num == 1
+    danger_num_2 = 0 # number of danger_num == 2
+    ani = 0
+    if loop == 0: #run one time with animation
+        loop = 1
+        ani = 1
+    for _ in range(loop):
+        case = gen_case(rate, k, m)
+        it, danger_num = get_reward(case,iteration,func,ani)
+        if it<iteration:
+            escape = escape + 1
+        if danger_num == 1:
+            danger_num_1 = danger_num_1 + 1
+        if danger_num == 2:
+            danger_num_2 = danger_num_2 + 1
+    return(escape/loop, [danger_num_1/loop, danger_num_2/loop])
 
-# flag = surround_judge(pew,ppw,vem,vpm)
-# it = get_reward(pew,ppw,vem,vpm,dc,ti,iteration,k,m,forceeq)
-# print(flag)
-# print(it)
+def get_lambda_list(*param):
+    "get a list of lambda function from str list"
+    lambda_list = []
+    for eq in param:
+        lambda_list.append(EvLambda(eq))
+    return lambda_list
+
+def get_list_escape_rate(lambda_list, loop = 1000):
+    "get the escape rate of a list of lambda function"
+    for i in range(len(lambda_list)):
+        print(loop, 'times', escape_test(lambda_list[i], loop)[0], '  ', lambda_list[i])
+
+if __name__ == '__main__':
+    lambda_list = get_lambda_list('-r*tri/(r-dc)',
+    'tri*(r + 1)/(dc - r)',
+    '-tri/3 + tri/(dc - r)',
+    '(dc*r**3*tri + (2.8 - 1.4*tri)*(dc - r))/(dc*r**2*(dc - r))',
+    )
+    # get_list_escape_rate(lambda_list, 1000)
+    print(escape_test(func=lambda_list[0], loop=100))
