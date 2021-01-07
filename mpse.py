@@ -9,7 +9,7 @@ def Abs(x):
 class EvLambda( object ):
     def __init__( self, body ):
         self.body= body
-    def __call__( self, r,tri,dc,ep,ep2,vpm,minr,maxr,avgr,stdr):
+    def __call__( self, r,tri,dc,ep,ep2,vpm,vem,minr,maxr,avgr,stdr):
         return eval( self.body )
     def __str__( self ):
         return self.body
@@ -20,7 +20,7 @@ def veeq(r,alpha,dc,vem,epsilon,vpm,forceeq):
     force_sum = np.zeros(2)
     for i in range(2):
         tri = np.cos(alpha) if i==0 else np.sin(alpha)
-        force[i] = forceeq(r, tri, dc, epsilon, down(epsilon), vpm, np.min(r), np.max(r), np.mean(r), np.std(r))
+        force[i] = forceeq(r, tri, dc, epsilon, down(epsilon), vpm, vem, np.min(r), np.max(r), np.mean(r), np.std(r))
     force_sum = np.sum(force, axis=1) + np.random.uniform(1e-10, 1e-8, 2) * np.random.choice([-1,1], 2)
     ve = vem*force_sum/np.linalg.norm(force_sum)
     return ve
@@ -28,19 +28,19 @@ def veeq(r,alpha,dc,vem,epsilon,vpm,forceeq):
 class PuLambda( object ):
     def __init__( self, body ):
         self.body= body
-    def __call__( self, adep, r, rater):
+    def __call__( self, adep, r, rater, dc,ep,ep2,vpm,vem,minr,maxr,avgr,stdr):
         return eval( self.body )
     def __str__( self ):
         return self.body
 
-def vpeq(r, alpha, theta, epsilon, vpm, m, k, pu_lambda):
+def vpeq(r, alpha, theta, epsilon, vpm, m, k, dc, vem, pu_lambda):
     "calc vp from begining"
     if pu_lambda == 0:
         delta = deltaeq(epsilon, down(epsilon), up(theta), down(theta), m)
         gamma = gammaeq(r, down(r), up(r))
         beta = betaeq(delta, gamma, k)
     else:
-        beta = pu_lambda(abs(epsilon-down(epsilon)), r, r/((down(r)+r+up(r))/3))
+        beta = pu_lambda(abs(epsilon-down(epsilon)), r, r/((down(r)+r+up(r))/3), dc, epsilon, down(epsilon), vpm, vem, np.min(r), np.max(r), np.mean(r), np.std(r))
     sd = np.sign(epsilon - down(epsilon))
     vp = vpeq_beta(alpha, sd, vpm, beta)
     return vp
@@ -241,7 +241,7 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
         it = it + 1
 
         #pursuer strategy
-        vp_sort = vpeq(r_sort, alpha_sort, theta_sort, epsilon_sort, vpm_sort, m, k, pu_lambda)
+        vp_sort = vpeq(r_sort, alpha_sort, theta_sort, epsilon_sort, vpm_sort, m, k, dc, vem, pu_lambda)
         vp = vp_sort[index_reverse]
 
         #evader strategy
@@ -337,4 +337,4 @@ if __name__ == '__main__':
     )
     # get_list_capture_rate(ev_lambda_list, 1000)
     print(capture_test(func=ev_lambda_list[0], loop=10))
-    # print(capture_test(func=def_pu_lambda, loop=10, pursuer=1))
+    print(capture_test(func=def_pu_lambda, loop=10, pursuer=1))

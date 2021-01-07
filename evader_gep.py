@@ -49,7 +49,7 @@ def protected_div(x1, x2):
 
 import operator 
 
-pset = gep.PrimitiveSet('Main', input_names=['r','tri','dc','ep','ep2', 'vpm', 'minr','maxr','avgr','stdr'])
+pset = gep.PrimitiveSet('Main', input_names=['r','tri','dc','ep','ep2','vpm','vem','minr','maxr','avgr','stdr'])
 pset.add_function(operator.add, 2)
 pset.add_function(operator.sub, 2)
 pset.add_function(operator.mul, 2)
