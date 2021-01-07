@@ -28,7 +28,7 @@ def veeq(r,alpha,dc,vem,epsilon,vpm,forceeq):
 class PuLambda( object ):
     def __init__( self, body ):
         self.body= body
-    def __call__( self, dep, dth, r, rater):
+    def __call__( self, adep, dth, r, rater):
         return eval( self.body )
     def __str__( self ):
         return self.body
@@ -40,7 +40,7 @@ def vpeq(r, alpha, theta, epsilon, vpm, m, k, pu_lambda):
         gamma = gammaeq(r, down(r), up(r))
         beta = betaeq(delta, gamma, k)
     else:
-        beta = pu_lambda(epsilon-down(epsilon), up(theta)-down(theta), r, r/((down(r)+r+up(r))/3))
+        beta = pu_lambda(abs(epsilon-down(epsilon)), up(theta)-down(theta), r, r/((down(r)+r+up(r))/3))
     sd = np.sign(epsilon - down(epsilon))
     vp = vpeq_beta(alpha, sd, vpm, beta)
     return vp
@@ -322,6 +322,7 @@ def get_list_capture_rate(lambda_list, loop = 1000):
         print(loop, 'times', capture_test(lambda_list[i], loop)[0], '  ', lambda_list[i])
 
 if __name__ == '__main__':
+    # np.random.seed(0)
     ev_lambda_list = get_lambda_list('-r*tri/(r-dc)',
 	'r*tri*vpm*(dc*ep + vpm)/(dc - r)',
     'ep + r*tri*vpm**2/(dc - r) + tri/(r*vpm)',
