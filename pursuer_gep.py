@@ -40,7 +40,7 @@ def protected_pow(x1, x2):
     #     result = 2**20
     # else:
     #     result = abs(x1)**x2
-    return np.min([result, 2**30])
+    return np.min([result, 2**20])
 
 def protected_div(x1, x2):
     if abs(x2) < 1e-6:
@@ -139,7 +139,7 @@ pop = toolbox.population(n=n_pop)
 hof = tools.HallOfFame(10)   # only record the best 10 individuals ever found in all generations
 
 # start evolution
-pop, log = gep.gep_simple(pop, toolbox, n_generations=n_gen, n_elites=1, stats=stats, hall_of_fame=hof, verbose=True)
+pop, log = gep.gep_simple(pop, toolbox, n_generations=n_gen, n_elites=0, stats=stats, hall_of_fame=hof, verbose=True)
 
 print('Symplified best individual: ')
 symplified_best = []
