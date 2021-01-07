@@ -142,7 +142,7 @@ print('Symplified best individual: ')
 symplified_best = []
 for i in range(len(hof)):
     symplified_best.append(gep.simplify(hof[i], sym_map))
-    print(mpse.escape_test(func=np.vectorize(toolbox.compile(hof[i])), loop=1),'  ', symplified_best[i])
+    print(mpse.capture_test(func=np.vectorize(toolbox.compile(hof[i])), loop=1),'  ', symplified_best[i])
 
 for i in symplified_best:
     print(i)

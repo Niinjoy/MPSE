@@ -288,10 +288,10 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
 
 # testeq0 = lambda r,tri,dc,ep,ep2: -r*tri/((r-dc))
 
-def escape_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, k = 1.9, m = 7, pursuer = 0):
-    "test the escape rate"
+def capture_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, k = 1.9, m = 7, pursuer = 0):
+    "test the capture rate"
     # func_vec = np.vectorize(func)
-    escape = 0
+    capture = 0
     danger_num_1 = 0 # number of danger_num == 1
     danger_num_2 = 0 # number of danger_num == 2
     ani = 0
@@ -301,13 +301,13 @@ def escape_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, k
     for _ in range(loop):
         case = gen_case(rate, k, m)
         it, danger_num = get_reward(case,iteration,func,ani,pursuer)
-        if it<iteration:
-            escape = escape + 1
+        if it>iteration:
+            capture = capture + 1
         if danger_num == 1:
             danger_num_1 = danger_num_1 + 1
         if danger_num == 2:
             danger_num_2 = danger_num_2 + 1
-    return(escape/loop, [danger_num_1/loop, danger_num_2/loop])
+    return(capture/loop, [danger_num_1/loop, danger_num_2/loop])
 
 def get_lambda_list(*param):
     "get a list of lambda function from str list"
@@ -316,10 +316,10 @@ def get_lambda_list(*param):
         lambda_list.append(EvLambda(eq))
     return lambda_list
 
-def get_list_escape_rate(lambda_list, loop = 1000):
-    "get the escape rate of a list of lambda function"
+def get_list_capture_rate(lambda_list, loop = 1000):
+    "get the capture rate of a list of lambda function"
     for i in range(len(lambda_list)):
-        print(loop, 'times', escape_test(lambda_list[i], loop)[0], '  ', lambda_list[i])
+        print(loop, 'times', capture_test(lambda_list[i], loop)[0], '  ', lambda_list[i])
 
 if __name__ == '__main__':
     lambda_list = get_lambda_list('-r*tri/(r-dc)',
@@ -334,6 +334,6 @@ if __name__ == '__main__':
     '-tri/3 + tri/(dc - r)',
     '(dc*r**3*tri + (2.8 - 1.4*tri)*(dc - r))/(dc*r**2*(dc - r))',
     )
-    # get_list_escape_rate(lambda_list, 1000)
-    print(escape_test(func=def_ev_lambda, loop=10))
-    # print(escape_test(func=def_pu_lambda, loop=10, pursuer=1))
+    # get_list_capture_rate(lambda_list, 1000)
+    print(capture_test(func=def_ev_lambda, loop=10))
+    # print(capture_test(func=def_pu_lambda, loop=10, pursuer=1))
