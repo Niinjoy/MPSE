@@ -326,8 +326,8 @@ if __name__ == '__main__':
     ev_lambda_list = get_lambda_list('-r*tri/(r-dc)',
 	'r*tri*vpm*(dc*ep + vpm)/(dc - r)',
     'ep + r*tri*vpm**2/(dc - r) + tri/(r*vpm)',
-    'r*tri*vpm*(vpm + 0.933050058558597)/(dc - r)',
-    'tri*(0.226789355392519*dc**2*tri*(dc - r) + ep2*r*vpm**2)/(ep2*(dc - r))',
+    'r*tri*vpm*(vpm + 0.9)/(dc - r)',
+    'tri*(0.2*dc**2*tri*(dc - r) + ep2*r*vpm**2)/(ep2*(dc - r))',
     'tri*(dc*(dc - r)*(dc - tri) + ep2*r**2*vpm**2)/(ep2*r*(dc - r))',
     '(ep**2*(dc - r)*(dc*ep2 - r) + r**2*tri*vpm**2)/(r*(dc - r))',
     'tri*(dc + r*vpm**2 - r)/(dc - r)',
@@ -336,5 +336,5 @@ if __name__ == '__main__':
     '(dc*r**3*tri + (2.8 - 1.4*tri)*(dc - r))/(dc*r**2*(dc - r))',
     )
     # get_list_capture_rate(ev_lambda_list, 1000)
-    print(capture_test(func=ev_lambda_list[0], loop=10))
-    print(capture_test(func=def_pu_lambda, loop=10, pursuer=1))
+    print(capture_test(func=ev_lambda_list[1], loop=0))
+    # print(capture_test(func=def_pu_lambda, loop=10, pursuer=1))
