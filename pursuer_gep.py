@@ -106,8 +106,8 @@ import mpse
 iteration = 1000 #maximun time iteration
 evtime = 5
 # size of population and number of generations
-n_pop = 200
-n_gen = 200
+n_pop = 300
+n_gen = 300
 
 previous_gen = -1
 case_list = [None for _ in range(evtime)]
