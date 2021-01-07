@@ -117,7 +117,7 @@ def evaluate(individual, gen):
     itsum = 0
     for i in range(evtime):
         if gen != previous_gen:
-            case_list[i] = mpse.gen_case(1)
+            case_list[i] = mpse.gen_case(0.8)
             # case_list[i] = mpse.gen_case(gen/n_gen)
             # print('new gen')
         it, danger_num = mpse.get_reward(case_list[i],iteration,func_vec)

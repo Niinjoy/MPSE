@@ -1,6 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+from math import sin
+from math import cos
+def Abs(x):
+    return abs(x)
 
 class EvLambda( object ):
     def __init__( self, body ):

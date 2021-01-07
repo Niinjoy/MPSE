@@ -104,10 +104,10 @@ stats.register("max", np.max)
 
 import mpse
 iteration = 1000 #maximun time iteration
-evtime = 1
+evtime = 5
 # size of population and number of generations
-n_pop = 5
-n_gen = 5
+n_pop = 200
+n_gen = 200
 
 previous_gen = -1
 case_list = [None for _ in range(evtime)]
