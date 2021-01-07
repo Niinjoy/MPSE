@@ -7,6 +7,6 @@ def testeq(r,tri,dc,ep,ep2,vpm):
     force = - r*tri/((r - 1*dc)**1)
     return force
 
-testeq0 = lambda r,tri,dc,ep,ep2: - r*tri/((r - dc))
+# testeq0 = lambda r,tri,dc,ep,ep2: - r*tri/((r - dc))
 
-print(mpse.escape_test(func = testeq0, loop = 0))
+# print(mpse.escape_test(func = testeq0, loop = 0))

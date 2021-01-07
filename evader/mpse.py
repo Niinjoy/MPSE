@@ -10,17 +10,27 @@ class EvLambda( object ):
     def __str__( self ):
         return self.body
 
-def veeq(r,alpha,dc,vem,epsilon,vpm,inputeq):
+def veeq(r,alpha,dc,vem,epsilon,vpm,forceeq):
     "calc ve"
     force = np.zeros((2,r.shape[0]))
     force_sum = np.zeros(2)
     for i in range(2):
         tri = np.cos(alpha) if i==0 else np.sin(alpha)
-        force[i] = inputeq(r, tri, dc, epsilon, down(epsilon), np.min(r), np.max(r), np.mean(r), np.std(r))
+        force[i] = forceeq(r, tri, dc, epsilon, down(epsilon), np.min(r), np.max(r), np.mean(r), np.std(r))
     force_sum = np.sum(force, axis=1) + np.random.uniform(1e-10, 1e-8, 2) * np.random.choice([-1,1], 2)
     ve = vem*force_sum/np.linalg.norm(force_sum)
     return ve
 
+class PuLambda( object ):
+    def __init__( self, body ):
+        self.body= body
+    def __call__( self, dep, dth, r, avg3r):
+        return eval( self.body )
+    def __str__( self ):
+        return self.body
+
+def_ev_lambda = EvLambda('-r*tri/(r-dc)')
+def_pu_lambda = PuLambda('0') #('dep + dth + r + avg3r')
 colors=['b','c','g','m','r','y','g','m','r','y'] #color of pursuer
 
 class Case: 
@@ -94,19 +104,22 @@ def vpeq_beta(alpha,sd,vpm,beta):
     vp = np.vstack((x,y)).T
     return vp
 
-def vpeq(r, alpha, theta, epsilon, vpm, m, k):
+def vpeq(r, alpha, theta, epsilon, vpm, m, k, pu_lambda):
     "calc vp from begining"
-    delta = deltaeq(epsilon, down(epsilon), up(theta), down(theta), m)
-    gamma = gammaeq(r, down(r), up(r))
+    if pu_lambda == 0:
+        delta = deltaeq(epsilon, down(epsilon), up(theta), down(theta), m)
+        gamma = gammaeq(r, down(r), up(r))
+        beta = betaeq(delta, gamma, k)
+    else:
+        beta = pu_lambda(epsilon-down(epsilon), up(theta)-down(theta), r, (down(r)+r+up(r))/3)
     sd = np.sign(epsilon - down(epsilon))
-    beta = betaeq(delta, gamma, k)
     vp = vpeq_beta(alpha, sd, vpm, beta)
     return vp
 
-def forceeq(r,tri,dc):
-    "calc force"
-    force = - r*tri/((r - 1*dc)**0.9)
-    return force
+# def forceeq(r,tri,dc):
+#     "calc force"
+#     force = - r*tri/((r - 1*dc)**0.9)
+#     return force
 
 def surround_judge(pew,ppw,vem,vpm):
     "judge whether surrounded in the initial state"
@@ -176,7 +189,7 @@ def handle_close(evt):
     print('Closed Figure!')
     sys.exit()
 
-def get_reward(case,iteration,inputeq,ani = 0):
+def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     "get reward"
     pew = case.pew
     ppw = case.ppw
@@ -203,6 +216,13 @@ def get_reward(case,iteration,inputeq,ani = 0):
     pew_ini = pew[:]
     danger_dis = dc+ti*(vem+vpm)
 
+    if pursuer == 0: #test evader
+        pu_lambda = 0
+        ev_lambda = inputeq
+    else: #thest pursuer
+        pu_lambda = inputeq
+        ev_lambda = def_ev_lambda
+
     if ani != 0:
         fig = plt.figure()
         fig.canvas.mpl_connect('close_event', handle_close)
@@ -217,11 +237,11 @@ def get_reward(case,iteration,inputeq,ani = 0):
         it = it + 1
 
         #pursuer strategy
-        vp_sort = vpeq(r_sort, alpha_sort, theta_sort, epsilon_sort, vpm_sort, m, k)
+        vp_sort = vpeq(r_sort, alpha_sort, theta_sort, epsilon_sort, vpm_sort, m, k, pu_lambda)
         vp = vp_sort[index_reverse]
 
         #evader strategy
-        ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,inputeq)
+        ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda)
 
         #update position
         ppw = ppw + vp*ti
@@ -252,8 +272,9 @@ def get_reward(case,iteration,inputeq,ani = 0):
         if (np.max(epsilon_sort)>1.2 and np.min(r)>3*dc) or np.linalg.norm(pew-pew_ini)>r_max_ini*1.5 :
             # print('escaped!')
             break
-    if it == iteration or it < 5:
-        print(pew,ppw,epsilon_sort[index_reverse])
+    # if it == iteration or it < 5:
+    #     if pursuer == 0:
+    #         print(pew,ppw,epsilon_sort[index_reverse])
 
     if danger_num != 0 and ani != 0:
         print(danger_num)
@@ -263,7 +284,7 @@ def get_reward(case,iteration,inputeq,ani = 0):
 
 # testeq0 = lambda r,tri,dc,ep,ep2: -r*tri/((r-dc))
 
-def escape_test(func, loop = 1000, rate = 1, iteration = 1000, k = 1.9, m = 7):
+def escape_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, k = 1.9, m = 7, pursuer = 0):
     "test the escape rate"
     # func_vec = np.vectorize(func)
     escape = 0
@@ -275,7 +296,7 @@ def escape_test(func, loop = 1000, rate = 1, iteration = 1000, k = 1.9, m = 7):
         ani = 1
     for _ in range(loop):
         case = gen_case(rate, k, m)
-        it, danger_num = get_reward(case,iteration,func,ani)
+        it, danger_num = get_reward(case,iteration,func,ani,pursuer)
         if it<iteration:
             escape = escape + 1
         if danger_num == 1:
@@ -303,4 +324,5 @@ if __name__ == '__main__':
     '(dc*r**3*tri + (2.8 - 1.4*tri)*(dc - r))/(dc*r**2*(dc - r))',
     )
     # get_list_escape_rate(lambda_list, 1000)
-    print(escape_test(func=lambda_list[0], loop=1))
+    print(escape_test(func=def_ev_lambda, loop=10))
+    # print(escape_test(func=def_pu_lambda, loop=10, pursuer=1))

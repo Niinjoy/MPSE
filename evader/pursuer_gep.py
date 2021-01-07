@@ -49,17 +49,20 @@ def protected_div(x1, x2):
 
 import operator 
 
-pset = gep.PrimitiveSet('Main', input_names=['r','tri','dc','ep','ep2','minr','maxr','avgr','stdr'])
+pset = gep.PrimitiveSet('Main', input_names=['dep', 'dth', 'r', 'avg3r'])
 pset.add_function(operator.add, 2)
 pset.add_function(operator.sub, 2)
 pset.add_function(operator.mul, 2)
 pset.add_function(protected_div, 2)
-# pset.add_function(protected_pow, 2)
+pset.add_function(protected_pow, 2)
+pset.add_function(operator.abs, 1)
+pset.add_function(math.sin, 1)
+pset.add_function(math.cos, 1)
 pset.add_rnc_terminal()
 
 from deap import creator, base, tools
 
-creator.create("FitnessMin", base.Fitness, weights=(-1,))  # to minimize the objective (fitness)
+creator.create("FitnessMin", base.Fitness, weights=(1,))  # to minimize the objective (fitness)
 creator.create("Individual", gep.Chromosome, fitness=creator.FitnessMin)
 
 h = 8 # head length
@@ -101,10 +104,10 @@ stats.register("max", np.max)
 
 import mpse
 iteration = 1000 #maximun time iteration
-evtime = 5
+evtime = 1
 # size of population and number of generations
-n_pop = 200
-n_gen = 200
+n_pop = 5
+n_gen = 5
 
 previous_gen = -1
 case_list = [None for _ in range(evtime)]
@@ -120,11 +123,11 @@ def evaluate(individual, gen):
             case_list[i] = mpse.gen_case(1)
             # case_list[i] = mpse.gen_case(gen/n_gen)
             # print('new gen')
-        it, danger_num = mpse.get_reward(case_list[i],iteration,func_vec)
-        if danger_num == 1:
-            it = it + iteration * 2
-        if danger_num == 2:
-            it = it + iteration * 1
+        it= mpse.get_reward(case_list[i],iteration,func_vec,0,1)[0]
+        # if danger_num == 1:
+        #     it = it + iteration * 2
+        # if danger_num == 2:
+        #     it = it + iteration * 1
         itsum = itsum + it
     previous_gen = gen
     # print(itsum)
@@ -142,7 +145,7 @@ print('Symplified best individual: ')
 symplified_best = []
 for i in range(len(hof)):
     symplified_best.append(gep.simplify(hof[i], sym_map))
-    print(mpse.escape_test(func=np.vectorize(toolbox.compile(hof[i])), loop=1),'  ', symplified_best[i])
+    print(mpse.escape_test(func=np.vectorize(toolbox.compile(hof[i])), loop=1, pursuer=1),'  ', symplified_best[i])
 
 for i in symplified_best:
     print(i)
