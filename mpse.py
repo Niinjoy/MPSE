@@ -28,7 +28,7 @@ def veeq(r,alpha,dc,vem,epsilon,vpm,forceeq):
 class PuLambda( object ):
     def __init__( self, body ):
         self.body= body
-    def __call__( self, adep, dth, r, rater):
+    def __call__( self, adep, r, rater):
         return eval( self.body )
     def __str__( self ):
         return self.body
@@ -40,7 +40,7 @@ def vpeq(r, alpha, theta, epsilon, vpm, m, k, pu_lambda):
         gamma = gammaeq(r, down(r), up(r))
         beta = betaeq(delta, gamma, k)
     else:
-        beta = pu_lambda(abs(epsilon-down(epsilon)), up(theta)-down(theta), r, r/((down(r)+r+up(r))/3))
+        beta = pu_lambda(abs(epsilon-down(epsilon)), r, r/((down(r)+r+up(r))/3))
     sd = np.sign(epsilon - down(epsilon))
     vp = vpeq_beta(alpha, sd, vpm, beta)
     return vp
