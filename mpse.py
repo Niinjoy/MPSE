@@ -9,7 +9,7 @@ def Abs(x):
 class EvLambda( object ):
     def __init__( self, body ):
         self.body= body
-    def __call__( self, r,tri,dc,ep,ep2,minr,maxr,avgr,stdr):
+    def __call__( self, r,tri,dc,ep,ep2,vpm,minr,maxr,avgr,stdr):
         return eval( self.body )
     def __str__( self ):
         return self.body
@@ -20,7 +20,7 @@ def veeq(r,alpha,dc,vem,epsilon,vpm,forceeq):
     force_sum = np.zeros(2)
     for i in range(2):
         tri = np.cos(alpha) if i==0 else np.sin(alpha)
-        force[i] = forceeq(r, tri, dc, epsilon, down(epsilon), np.min(r), np.max(r), np.mean(r), np.std(r))
+        force[i] = forceeq(r, tri, dc, epsilon, down(epsilon), vpm, np.min(r), np.max(r), np.mean(r), np.std(r))
     force_sum = np.sum(force, axis=1) + np.random.uniform(1e-10, 1e-8, 2) * np.random.choice([-1,1], 2)
     ve = vem*force_sum/np.linalg.norm(force_sum)
     return ve
@@ -323,6 +323,13 @@ def get_list_escape_rate(lambda_list, loop = 1000):
 
 if __name__ == '__main__':
     lambda_list = get_lambda_list('-r*tri/(r-dc)',
+	'r*tri*vpm*(dc*ep + vpm)/(dc - r)',
+    'ep + r*tri*vpm**2/(dc - r) + tri/(r*vpm)',
+    'r*tri*vpm*(vpm + 0.933050058558597)/(dc - r)',
+    'tri*(0.226789355392519*dc**2*tri*(dc - r) + ep2*r*vpm**2)/(ep2*(dc - r))',
+    'tri*(dc*(dc - r)*(dc - tri) + ep2*r**2*vpm**2)/(ep2*r*(dc - r))',
+    '(ep**2*(dc - r)*(dc*ep2 - r) + r**2*tri*vpm**2)/(r*(dc - r))',
+    'tri*(dc + r*vpm**2 - r)/(dc - r)',
     'tri*(r + 1)/(dc - r)',
     '-tri/3 + tri/(dc - r)',
     '(dc*r**3*tri + (2.8 - 1.4*tri)*(dc - r))/(dc*r**2*(dc - r))',
