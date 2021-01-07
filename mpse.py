@@ -28,10 +28,22 @@ def veeq(r,alpha,dc,vem,epsilon,vpm,forceeq):
 class PuLambda( object ):
     def __init__( self, body ):
         self.body= body
-    def __call__( self, dep, dth, r, avg3r):
+    def __call__( self, dep, dth, r, rater):
         return eval( self.body )
     def __str__( self ):
         return self.body
+
+def vpeq(r, alpha, theta, epsilon, vpm, m, k, pu_lambda):
+    "calc vp from begining"
+    if pu_lambda == 0:
+        delta = deltaeq(epsilon, down(epsilon), up(theta), down(theta), m)
+        gamma = gammaeq(r, down(r), up(r))
+        beta = betaeq(delta, gamma, k)
+    else:
+        beta = pu_lambda(epsilon-down(epsilon), up(theta)-down(theta), r, r/((down(r)+r+up(r))/3))
+    sd = np.sign(epsilon - down(epsilon))
+    vp = vpeq_beta(alpha, sd, vpm, beta)
+    return vp
 
 def_ev_lambda = EvLambda('-r*tri/(r-dc)')
 def_pu_lambda = PuLambda('0') #('dep + dth + r + avg3r')
@@ -106,18 +118,6 @@ def vpeq_beta(alpha,sd,vpm,beta):
     x=vs*np.cos(a_s)+vh*np.cos(a_h)
     y=vs*np.sin(a_s)+vh*np.sin(a_h)
     vp = np.vstack((x,y)).T
-    return vp
-
-def vpeq(r, alpha, theta, epsilon, vpm, m, k, pu_lambda):
-    "calc vp from begining"
-    if pu_lambda == 0:
-        delta = deltaeq(epsilon, down(epsilon), up(theta), down(theta), m)
-        gamma = gammaeq(r, down(r), up(r))
-        beta = betaeq(delta, gamma, k)
-    else:
-        beta = pu_lambda(epsilon-down(epsilon), up(theta)-down(theta), r, (down(r)+r+up(r))/3)
-    sd = np.sign(epsilon - down(epsilon))
-    vp = vpeq_beta(alpha, sd, vpm, beta)
     return vp
 
 # def forceeq(r,tri,dc):
@@ -223,7 +223,7 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     if pursuer == 0: #test evader
         pu_lambda = 0
         ev_lambda = inputeq
-    else: #thest pursuer
+    else: #test pursuer
         pu_lambda = inputeq
         ev_lambda = def_ev_lambda
 
@@ -322,7 +322,7 @@ def get_list_capture_rate(lambda_list, loop = 1000):
         print(loop, 'times', capture_test(lambda_list[i], loop)[0], '  ', lambda_list[i])
 
 if __name__ == '__main__':
-    lambda_list = get_lambda_list('-r*tri/(r-dc)',
+    ev_lambda_list = get_lambda_list('-r*tri/(r-dc)',
 	'r*tri*vpm*(dc*ep + vpm)/(dc - r)',
     'ep + r*tri*vpm**2/(dc - r) + tri/(r*vpm)',
     'r*tri*vpm*(vpm + 0.933050058558597)/(dc - r)',
@@ -334,6 +334,6 @@ if __name__ == '__main__':
     '-tri/3 + tri/(dc - r)',
     '(dc*r**3*tri + (2.8 - 1.4*tri)*(dc - r))/(dc*r**2*(dc - r))',
     )
-    # get_list_capture_rate(lambda_list, 1000)
-    print(capture_test(func=def_ev_lambda, loop=10))
+    # get_list_capture_rate(ev_lambda_list, 1000)
+    print(capture_test(func=ev_lambda_list[0], loop=10))
     # print(capture_test(func=def_pu_lambda, loop=10, pursuer=1))
