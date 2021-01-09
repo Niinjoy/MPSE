@@ -33,7 +33,7 @@ sym_map = {
 }
 
 def protected_pow(x1, x2):
-    result = np.power(np.max([float(abs(x1)), 1e-6]),np.min([x2,300]))
+    result = np.power(np.max([float(abs(x1)), 1e-6]),np.min([x2,30]))
     return np.min([result, 2**20])
 
 def protected_div(x1, x2):
