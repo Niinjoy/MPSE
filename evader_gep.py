@@ -33,7 +33,7 @@ sym_map = {
 }
 
 def protected_pow(x1, x2):
-    result = np.power(float(abs(x1)),x2)
+    result = np.power(np.max([float(abs(x1)), 1e-6]),np.min([x2,300]))
     return np.min([result, 2**20])
 
 def protected_div(x1, x2):
@@ -53,6 +53,8 @@ pset.add_function(protected_pow, 2)
 pset.add_function(operator.abs, 1)
 pset.add_function(math.sin, 1)
 pset.add_function(math.cos, 1)
+pset.add_constant_terminal(np.pi)
+pset.add_constant_terminal(np.e)
 
 from deap import creator, base, tools
 
@@ -74,7 +76,7 @@ toolbox.register('compile', gep.compile_, pset=pset)
 
 toolbox.register('select', tools.selTournament, tournsize=3)
 # 1. general operators
-toolbox.register('mut_uniform', gep.mutate_uniform, pset=pset, ind_pb=0.05, pb=1)
+toolbox.register('mut_uniform', gep.mutate_uniform, pset=pset, ind_pb=2 / (2 * h + 1), pb=1)
 toolbox.register('mut_invert', gep.invert, pb=0.1)
 toolbox.register('mut_is_transpose', gep.is_transpose, pb=0.1)
 toolbox.register('mut_ris_transpose', gep.ris_transpose, pb=0.1)
@@ -101,8 +103,8 @@ iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
     evtime = 3
-    n_pop = 200
-    n_gen = 200
+    n_pop = 300
+    n_gen = 300
     loop = 1000
 else: # develop mode
     evtime = 1
