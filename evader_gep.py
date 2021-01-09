@@ -34,13 +34,7 @@ sym_map = {
 
 def protected_pow(x1, x2):
     result = np.power(float(abs(x1)),x2)
-    # try:
-    #     result = abs(x1)**x2
-    # except:
-    #     result = 2**20
-    # else:
-    #     result = abs(x1)**x2
-    return np.min([result, 2**30])
+    return np.min([result, 2**20])
 
 def protected_div(x1, x2):
     if abs(x2) < 1e-6:
@@ -50,12 +44,15 @@ def protected_div(x1, x2):
 import operator 
 
 pset = gep.PrimitiveSet('Main', input_names=['r','tri','dc','ep','ep2','vpm','vem','minr','maxr','avgr','stdr'])
+pset.add_rnc_terminal()
 pset.add_function(operator.add, 2)
 pset.add_function(operator.sub, 2)
 pset.add_function(operator.mul, 2)
 pset.add_function(protected_div, 2)
-# pset.add_function(protected_pow, 2)
-pset.add_rnc_terminal()
+pset.add_function(protected_pow, 2)
+pset.add_function(operator.abs, 1)
+pset.add_function(math.sin, 1)
+pset.add_function(math.cos, 1)
 
 from deap import creator, base, tools
 
@@ -101,11 +98,18 @@ stats.register("max", np.max)
 
 import mpse
 iteration = 1000 #maximun time iteration
-evtime = 5
-# size of population and number of generations
-n_pop = 300
-n_gen = 300
-
+dev = 0
+if dev == 0:
+    evtime = 3
+    n_pop = 200
+    n_gen = 200
+    loop = 1000
+else: # develop mode
+    evtime = 1
+    n_pop = 10
+    n_gen = 10
+    loop = 1
+   
 previous_gen = -1
 case_list = [None for _ in range(evtime)]
 
@@ -117,14 +121,14 @@ def evaluate(individual, gen):
     itsum = 0
     for i in range(evtime):
         if gen != previous_gen:
-            case_list[i] = mpse.gen_case(0.8)
+            case_list[i] = mpse.gen_case(0.7)
             # case_list[i] = mpse.gen_case(gen/n_gen)
             # print('new gen')
         it, danger_num = mpse.get_reward(case_list[i],iteration,func_vec)
         if danger_num == 1:
-            it = it + iteration * 2
+            it = it + iteration * 4
         if danger_num == 2:
-            it = it + iteration * 1
+            it = it + iteration * 2
         itsum = itsum + it
     previous_gen = gen
     # print(itsum)
@@ -136,13 +140,16 @@ pop = toolbox.population(n=n_pop)
 hof = tools.HallOfFame(10)   # only record the best 10 individuals ever found in all generations
 
 # start evolution
-pop, log = gep.gep_simple(pop, toolbox, n_generations=n_gen, n_elites=1, stats=stats, hall_of_fame=hof, verbose=True)
+pop, log = gep.gep_simple(pop, toolbox, n_generations=n_gen, n_elites=0, stats=stats, hall_of_fame=hof, verbose=True)
 
-print('Symplified best individual: ')
-symplified_best = []
+print('\nSymplified best individual: ')
+symplified_best_list = []
 for i in range(len(hof)):
-    symplified_best.append(gep.simplify(hof[i], sym_map))
-    print(mpse.capture_test(func=np.vectorize(toolbox.compile(hof[i])), loop=1),'  ', symplified_best[i])
+    symplified_best = gep.simplify(hof[i], sym_map)
+    if symplified_best not in symplified_best_list:
+        symplified_best_list.append(symplified_best)
+        print(mpse.capture_test(func=np.vectorize(toolbox.compile(hof[i])), loop=loop),'  ', symplified_best)
 
-for i in symplified_best:
-    print(i)
+print('\n', len(symplified_best_list), 'different items')
+for i in symplified_best_list:
+    print("\'", i, "\',")

@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from math import sin
-from math import cos
+def sin(x):
+    return np.sin(x)
+def cos(x):
+    return np.cos(x)
 def Abs(x):
     return abs(x)
 
@@ -309,21 +311,28 @@ def capture_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, 
             danger_num_2 = danger_num_2 + 1
     return(capture/loop, [danger_num_1/loop, danger_num_2/loop])
 
-def get_lambda_list(*param):
-    "get a list of lambda function from str list"
+def get_ev_lambda_list(*param):
+    "get a list of evader lambda function from str list"
     lambda_list = []
     for eq in param:
         lambda_list.append(EvLambda(eq))
     return lambda_list
 
+def get_pu_lambda_list(*param):
+    "get a list of pursuer lambda function from str list"
+    lambda_list = []
+    for eq in param:
+        lambda_list.append(PuLambda(eq))
+    return lambda_list
+
 def get_list_capture_rate(lambda_list, loop = 1000):
     "get the capture rate of a list of lambda function"
     for i in range(len(lambda_list)):
-        print(loop, 'times', capture_test(lambda_list[i], loop)[0], '  ', lambda_list[i])
+        print(loop, 'times', capture_test(lambda_list[i], loop), '  ', lambda_list[i])
 
 if __name__ == '__main__':
     # np.random.seed(0)
-    ev_lambda_list = get_lambda_list('-r*tri/(r-dc)',
+    good_ev_lambda_list = get_ev_lambda_list('-r*tri/(r-dc)',
 	'r*tri*vpm*(dc*ep + vpm)/(dc - r)',
     'ep + r*tri*vpm**2/(dc - r) + tri/(r*vpm)',
     'r*tri*vpm*(vpm + 0.9)/(dc - r)',
@@ -334,7 +343,14 @@ if __name__ == '__main__':
     'tri*(r + 1)/(dc - r)',
     '-tri/3 + tri/(dc - r)',
     '(dc*r**3*tri + (2.8 - 1.4*tri)*(dc - r))/(dc*r**2*(dc - r))',
-    )
+    'r*(dc - r + stdr*tri*vem)/(dc - r)',
+    '(avgr*r*tri*vem*(tri - vpm) + 1.36*maxr*stdr*(dc - r))/((dc - r)*(tri - vpm))',
+    'r*(dc + maxr*tri*vem - r)/(dc - r)',
+    '(maxr*r*tri*vem + minr*(dc - r))/(dc - r)',
+    ) # capture rate < 0.7
+    good_pu_lambda_list = get_pu_lambda_list('adep*minr/(dc*vem) + sin(adep)','0')
+    # ev_lambda_list = get_ev_lambda_list(    )
+
     # get_list_capture_rate(ev_lambda_list, 1000)
-    print(capture_test(func=ev_lambda_list[1], loop=0))
-    # print(capture_test(func=def_pu_lambda, loop=10, pursuer=1))
+    print(capture_test(func=good_ev_lambda_list[0], loop=1))
+    # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
