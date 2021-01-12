@@ -7,6 +7,7 @@ import operator
 import sympy as sp
 import math
 import multigep
+import time
 
 # for reproduction
 s = 0
@@ -103,7 +104,7 @@ stats.register("max", np.max)
 
 import mpse
 iteration = 1000 #maximun time iteration
-dev = 1
+dev = 0
 if dev == 0:
     evtime = 3
     n_pop = 400
@@ -111,32 +112,40 @@ if dev == 0:
     loop = 1000
 else: # develop mode
     evtime = 1
-    n_pop = 5
-    n_gen = 5
+    n_pop = 30
+    n_gen = 3
     loop = 1
    
 previous_gen = -1
 case_list = [None for _ in range(evtime)]
 
-def evaluate(individual, gen):
+def evaluate(ind_and_gen):
+    time1 = time.time()
     """Evalute the fitness of an individual: MAE (mean absolute error)"""
     global previous_gen, case_list
+    individual = ind_and_gen[0]
+    gen = ind_and_gen[1]
     func = toolbox.compile(individual)
     func_vec = np.vectorize(func)
     itsum = 0
     for i in range(evtime):
-        if gen != previous_gen:
-            case_list[i] = mpse.gen_case(0.4)
+        # if gen != previous_gen:
+        case_list[i] = mpse.gen_case(0.4)
             # case_list[i] = mpse.gen_case(gen/n_gen)
             # print('new gen')
+        # time2 = time.time()
+    # print(previous_gen)
+    # previous_gen = gen
+    # for i in range(evtime):
+        # print(case_list[i].dc)
         it, danger_num = mpse.get_reward(case_list[i],iteration,func_vec)
         if danger_num == 1:
             it = it + iteration * 4
         if danger_num == 2:
             it = it + iteration * 2
         itsum = itsum + it
-    previous_gen = gen
     # print(itsum)
+    # print(time2-time1)
     return itsum/evtime,
 
 toolbox.register('evaluate', evaluate)
@@ -145,7 +154,10 @@ pop = toolbox.population(n=n_pop)
 hof = tools.HallOfFame(10)   # only record the best 10 individuals ever found in all generations
 
 # start evolution
+start = time.time()
 pop, log = multigep.gep_multi(pop, toolbox, n_generations=n_gen, n_elites=3, stats=stats, hall_of_fame=hof, verbose=True)
+end = time.time()
+print("time spent: {} s".format(round(end - start,2)))
 
 print('\nSymplified best individual: ')
 symplified_best_list = []

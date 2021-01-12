@@ -10,7 +10,8 @@ can be used as a reference.
 import deap
 import random
 import warnings
-
+import multiprocessing
+import time
 
 def _validate_basic_toolbox(tb):
     """
@@ -93,22 +94,29 @@ def gep_multi(population, toolbox, n_generations=100, n_elites=1,
     logbook = deap.tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
+    # myPool = multiprocessing.Pool(multiprocessing.cpu_count())
     for gen in range(n_generations + 1):
+        time1 = time.time()
         # evaluate: only evaluate the invalid ones, i.e., no need to reevaluate the unchanged ones
         # invalid_individuals = [ind for ind in population if not ind.fitness.valid]
-        invalid_individuals = [ind for ind in population]# if not ind.fitness.valid] # niin edited for valid individuals revaluate
-        # fitnesses = toolbox.map(toolbox.evaluate, invalid_individuals)
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_individuals, [gen for i in range(len(invalid_individuals))]) # niin edited to get gen information
-        for ind, fit in zip(invalid_individuals, fitnesses):
+        # invalid_individuals = [ind for ind in population]# if not ind.fitness.valid] # niin edited for valid individuals revaluate
+        # fitnesses = toolbox.map(toolbox.evaluate, population)
+        gen_list = [gen for i in range(len(population))]
+        # fitnesses = toolbox.map(toolbox.evaluate, zip(population, gen_list)) # niin edited to get gen information
+        with multiprocessing.Pool(multiprocessing.cpu_count()) as myPool:
+            fitnesses = myPool.map(toolbox.evaluate, zip(population, gen_list))
+        for ind, fit in zip(population, fitnesses):
             ind.fitness.values = fit
 
         # record statistics and log
         if hall_of_fame is not None:
             hall_of_fame.update(population)
         record = stats.compile(population) if stats else {}
-        logbook.record(gen=gen, nevals=len(invalid_individuals), **record)
+        logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
-            print(logbook.stream)
+            time2 = time.time()
+            print(logbook.stream, '   ', '%.2f'%(time2-time1) + 's')
+            # print(logbook.stream)
 
         if gen == n_generations:
             break
@@ -132,7 +140,8 @@ def gep_multi(population, toolbox, n_generations=100, n_elites=1,
 
         # replace the current population with the offsprings
         population = elites + offspring
-
+    # myPool.close()
+    # myPool.join()
     return population, logbook
 
 
