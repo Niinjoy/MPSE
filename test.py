@@ -14,7 +14,7 @@ if __name__=='__main__':
     print('当前母进程: {}'.format(os.getpid()))
     start = time.time()
     p = Pool(cpu_count())
-    for i in range(cpu_count()+1):
+    for i in range(cpu_count()):
         p.apply_async(long_time_task, args=(i,))
     print('等待所有子进程完成。')
     p.close()

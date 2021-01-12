@@ -6,6 +6,7 @@ import random
 import operator
 import sympy as sp
 import math
+import multigep
 
 # for reproduction
 s = 0
@@ -102,7 +103,7 @@ stats.register("max", np.max)
 
 import mpse
 iteration = 1000 #maximun time iteration
-dev = 0
+dev = 1
 if dev == 0:
     evtime = 3
     n_pop = 400
@@ -110,8 +111,8 @@ if dev == 0:
     loop = 1000
 else: # develop mode
     evtime = 1
-    n_pop = 10
-    n_gen = 10
+    n_pop = 5
+    n_gen = 5
     loop = 1
    
 previous_gen = -1
@@ -144,7 +145,7 @@ pop = toolbox.population(n=n_pop)
 hof = tools.HallOfFame(10)   # only record the best 10 individuals ever found in all generations
 
 # start evolution
-pop, log = gep.gep_simple(pop, toolbox, n_generations=n_gen, n_elites=3, stats=stats, hall_of_fame=hof, verbose=True)
+pop, log = multigep.gep_multi(pop, toolbox, n_generations=n_gen, n_elites=3, stats=stats, hall_of_fame=hof, verbose=True)
 
 print('\nSymplified best individual: ')
 symplified_best_list = []
