@@ -33,7 +33,9 @@ sym_map = {
 }
 
 def protected_pow(x1, x2):
-    result = np.power(np.max([float(abs(x1)), 1e-6]),np.min([x2,30]))
+    result = np.power(np.max([float(abs(x1)), 1e-6]),np.median([x2,20,-20]))
+    # if math.isinf(result) == True:
+    #     print(x1,x2,'inf!')
     return np.min([result, 2**20])
 
 def protected_div(x1, x2):
@@ -50,18 +52,18 @@ pset.add_function(operator.sub, 2)
 pset.add_function(operator.mul, 2)
 pset.add_function(protected_div, 2)
 pset.add_function(protected_pow, 2)
-pset.add_function(operator.abs, 1)
-pset.add_function(math.sin, 1)
-pset.add_function(math.cos, 1)
-pset.add_constant_terminal(np.pi)
-pset.add_constant_terminal(np.e)
+# pset.add_function(operator.abs, 1)
+# pset.add_function(math.sin, 1)
+# pset.add_function(math.cos, 1)
+# pset.add_constant_terminal(np.pi)
+# pset.add_constant_terminal(np.e)
 
 from deap import creator, base, tools
 
 creator.create("FitnessMin", base.Fitness, weights=(-1,))  # to minimize the objective (fitness)
 creator.create("Individual", gep.Chromosome, fitness=creator.FitnessMin)
 
-h = 8 # head length
+h = 10 # head length
 n_genes = 2   # number of genes in a chromosome
 r = 8   # length of the RNC array
 
@@ -103,8 +105,8 @@ iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
     evtime = 3
-    n_pop = 300
-    n_gen = 300
+    n_pop = 400
+    n_gen = 200
     loop = 1000
 else: # develop mode
     evtime = 1
@@ -123,7 +125,7 @@ def evaluate(individual, gen):
     itsum = 0
     for i in range(evtime):
         if gen != previous_gen:
-            case_list[i] = mpse.gen_case(0.7)
+            case_list[i] = mpse.gen_case(0.4)
             # case_list[i] = mpse.gen_case(gen/n_gen)
             # print('new gen')
         it, danger_num = mpse.get_reward(case_list[i],iteration,func_vec)
@@ -142,7 +144,7 @@ pop = toolbox.population(n=n_pop)
 hof = tools.HallOfFame(10)   # only record the best 10 individuals ever found in all generations
 
 # start evolution
-pop, log = gep.gep_simple(pop, toolbox, n_generations=n_gen, n_elites=0, stats=stats, hall_of_fame=hof, verbose=True)
+pop, log = gep.gep_simple(pop, toolbox, n_generations=n_gen, n_elites=3, stats=stats, hall_of_fame=hof, verbose=True)
 
 print('\nSymplified best individual: ')
 symplified_best_list = []

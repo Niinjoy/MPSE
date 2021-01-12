@@ -261,8 +261,9 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
         theta_sort = theta[index]
         epsilon_sort = epsiloneq(up(alpha_sort), alpha_sort, up(theta_sort), theta_sort)
         danger_num = len(r[r<danger_dis])
-        if danger_num !=0 and ani != 0:
-            print(danger_num)
+        if danger_num !=0:
+            if ani != 0:
+                print(danger_num)
         if ani != 0:
             # plt.cla()
             plt.axis('equal')
@@ -282,11 +283,14 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     #     if pursuer == 0:
     #         print(pew,ppw,epsilon_sort[index_reverse])
 
-    if danger_num != 0 and ani != 0:
-        print(danger_num)
+    final_danger_num = len(r[r<danger_dis*1.7])
+    if final_danger_num != 0:
+        # print(final_danger_num, np.sort(r)[final_danger_num:]/danger_dis[0])
+        if ani != 0:
+            print('final:',final_danger_num)
     if ani != 0:
         plt.show()
-    return(it, danger_num)
+    return(it, final_danger_num)
 
 # testeq0 = lambda r,tri,dc,ep,ep2: -r*tri/((r-dc))
 
@@ -350,7 +354,7 @@ if __name__ == '__main__':
     ) # capture rate < 0.7
     good_pu_lambda_list = get_pu_lambda_list('adep*minr/(dc*vem) + sin(adep)','0')
     # ev_lambda_list = get_ev_lambda_list(    )
-
     # get_list_capture_rate(ev_lambda_list, 1000)
-    print(capture_test(func=good_ev_lambda_list[0], loop=1))
+    ev_lambda_test = EvLambda('-(r+1)*tri/(r-dc)')
+    print(capture_test(func=ev_lambda_test, loop=1000),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
