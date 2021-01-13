@@ -12,7 +12,7 @@ import time
 # for reproduction
 s = 0
 random.seed(s)
-np.random.seed(s)
+# np.random.seed(s)
 
 sym_map = {
     operator.and_.__name__: sp.And,
@@ -104,20 +104,23 @@ stats.register("max", np.max)
 
 import mpse
 iteration = 1000 #maximun time iteration
-dev = 0
+dev = 1
 if dev == 0:
     evtime = 5
-    n_pop = 800
+    n_pop = 300
     n_gen = 200
     loop = 1000
 else: # develop mode
-    evtime = 1
-    n_pop = 30
-    n_gen = 3
+    evtime = 3
+    n_pop = 10
+    n_gen = 1
     loop = 1
-   
+rate = 0.7
 previous_gen = -1
-case_list = [None for _ in range(evtime)]
+start = time.time()
+case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
+end = time.time()
+print("time spent for case generation: {} s".format(round(end - start,2)))
 
 def evaluate(ind_and_gen):
     time1 = time.time()
@@ -130,15 +133,16 @@ def evaluate(ind_and_gen):
     itsum = 0
     for i in range(evtime):
         # if gen != previous_gen:
-        case_list[i] = mpse.gen_case(0.7)
+        # case_list[i] = mpse.gen_case(0.7)
             # case_list[i] = mpse.gen_case(gen/n_gen)
             # print('new gen')
         # time2 = time.time()
     # print(previous_gen)
     # previous_gen = gen
     # for i in range(evtime):
+        # print(np.random.uniform(0,1,1))
         # print(case_list[i].dc)
-        it, danger_num = mpse.get_reward(case_list[i],iteration,func_vec)
+        it, danger_num = mpse.get_reward(case_list[i+gen*evtime],iteration,func_vec)
         if danger_num == 1:
             it = it + iteration * 4
         if danger_num == 2:
@@ -169,4 +173,4 @@ for i in range(len(hof)):
 
 print('\n', len(symplified_best_list), 'different items')
 for i in symplified_best_list:
-    print("\'" + i + "\',")
+    print("\'" + str(i) + "\',")
