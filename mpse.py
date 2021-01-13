@@ -196,7 +196,7 @@ def handle_close(evt):
     sys.exit()
 
 def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
-    "get reward"
+    "get reward, pursuer=-1 for danger_num go back"
     pew = case.pew
     ppw = case.ppw
     vem = case.vem
@@ -222,7 +222,7 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     pew_ini = pew[:]
     danger_dis = dc+ti*(vem+vpm)
 
-    if pursuer == 0: #test evader
+    if pursuer <= 0: #test evader
         pu_lambda = 0
         ev_lambda = inputeq
     else: #test pursuer
@@ -246,9 +246,20 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
         vp_sort = vpeq(r_sort, alpha_sort, theta_sort, epsilon_sort, vpm_sort, m, k, dc, vem, pu_lambda)
         vp = vp_sort[index_reverse]
 
-        #evader strategy
-        ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda)
+        danger_num = len(r[r<danger_dis])
+        if danger_num !=0:
+            if ani != 0:
+                print(danger_num)
 
+        #evader strategy
+        if pursuer == -1 and (danger_num==1 or danger_num==2):#use danger_num go back
+            if danger_num == 1:
+                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda)
+            else:
+                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda)
+        else:
+            ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda)
+            
         #update position
         ppw = ppw + vp*ti
         pew = pew + ve*ti
@@ -260,10 +271,6 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
         vpm_sort = vpm[index]
         theta_sort = theta[index]
         epsilon_sort = epsiloneq(up(alpha_sort), alpha_sort, up(theta_sort), theta_sort)
-        danger_num = len(r[r<danger_dis])
-        if danger_num !=0:
-            if ani != 0:
-                print(danger_num)
         if ani != 0:
             # plt.cla()
             plt.axis('equal')
@@ -358,6 +365,6 @@ if __name__ == '__main__':
     good_pu_lambda_list = get_pu_lambda_list('adep*minr/(dc*vem) + sin(adep)','0')
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
-    ev_lambda_test = EvLambda('-(r+1)*tri/(r-dc)')
-    print(capture_test(func=ev_lambda_test, loop=1000),ev_lambda_test)
+    ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
+    print(capture_test(func=ev_lambda_test, loop=1),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))

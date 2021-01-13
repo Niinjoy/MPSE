@@ -106,16 +106,16 @@ import mpse
 iteration = 1000 #maximun time iteration
 dev = 1
 if dev == 0:
-    evtime = 5
-    n_pop = 300
-    n_gen = 200
+    evtime = 3
+    n_pop = 200
+    n_gen = 150
     loop = 1000
 else: # develop mode
     evtime = 3
     n_pop = 10
     n_gen = 1
     loop = 1
-rate = 0.7
+rate = 1
 previous_gen = -1
 start = time.time()
 case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
@@ -123,33 +123,19 @@ end = time.time()
 print("time spent for case generation: {} s".format(round(end - start,2)))
 
 def evaluate(ind_and_gen):
-    time1 = time.time()
     """Evalute the fitness of an individual: MAE (mean absolute error)"""
-    global previous_gen, case_list
     individual = ind_and_gen[0]
     gen = ind_and_gen[1]
     func = toolbox.compile(individual)
     func_vec = np.vectorize(func)
     itsum = 0
     for i in range(evtime):
-        # if gen != previous_gen:
-        # case_list[i] = mpse.gen_case(0.7)
-            # case_list[i] = mpse.gen_case(gen/n_gen)
-            # print('new gen')
-        # time2 = time.time()
-    # print(previous_gen)
-    # previous_gen = gen
-    # for i in range(evtime):
-        # print(np.random.uniform(0,1,1))
-        # print(case_list[i].dc)
         it, danger_num = mpse.get_reward(case_list[i+gen*evtime],iteration,func_vec)
         if danger_num == 1:
             it = it + iteration * 4
         if danger_num == 2:
             it = it + iteration * 2
         itsum = itsum + it
-    # print(itsum)
-    # print(time2-time1)
     return itsum/evtime,
 
 toolbox.register('evaluate', evaluate)
