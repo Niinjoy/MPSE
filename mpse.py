@@ -337,6 +337,9 @@ def get_list_capture_rate(lambda_list, loop = 1000):
 if __name__ == '__main__':
     # np.random.seed(0)
     good_ev_lambda_list = get_ev_lambda_list('-r*tri/(r-dc)',
+    ' tri*(4.66*dc - vem*(minr - (vpm*(ep2 + r))**(2*dc/vpm)))/vem ',
+    ' tri*(1.47*dc - vem*(minr - (vpm*(ep2 + r))**(2*dc/vpm)))/vem ',
+    ' tri*(-avgr*(minr - (vpm*(ep2 + r))**(2*dc/vpm)) + 1.47*dc)/avgr ',
 	'r*tri*vpm*(dc*ep + vpm)/(dc - r)',
     'ep + r*tri*vpm**2/(dc - r) + tri/(r*vpm)',
     'r*tri*vpm*(vpm + 0.9)/(dc - r)',

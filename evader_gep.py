@@ -106,8 +106,8 @@ import mpse
 iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
-    evtime = 3
-    n_pop = 400
+    evtime = 5
+    n_pop = 800
     n_gen = 200
     loop = 1000
 else: # develop mode
@@ -130,7 +130,7 @@ def evaluate(ind_and_gen):
     itsum = 0
     for i in range(evtime):
         # if gen != previous_gen:
-        case_list[i] = mpse.gen_case(0.4)
+        case_list[i] = mpse.gen_case(0.7)
             # case_list[i] = mpse.gen_case(gen/n_gen)
             # print('new gen')
         # time2 = time.time()
@@ -169,4 +169,4 @@ for i in range(len(hof)):
 
 print('\n', len(symplified_best_list), 'different items')
 for i in symplified_best_list:
-    print("\'", i, "\',")
+    print("\'" + i + "\',")
