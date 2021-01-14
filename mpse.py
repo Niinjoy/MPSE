@@ -143,6 +143,15 @@ def surround_judge(pew,ppw,vem,vpm):
         flag = 1
     return flag
 
+def surround_judge_alpha(alpha, theta):
+    "judge whether surrounded in the initial state"
+    epsilon = epsiloneq(up(alpha), alpha, up(theta), theta)
+    if np.max(epsilon)>=0:
+        flag = 0
+    else:
+        flag = 1
+    return flag
+
 def gen_case(rate = 1, k = 1.9, m = 7):
     "generate random case, rate 0 to 1, simple to hard"
     #generate range assign by rate, con for constant
@@ -170,17 +179,19 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     dc_max_end = 4
     dc_max = weight_boundray(dc_max_start, dc_max_end, rate)
 
-    num = np.random.choice(np.arange(num_min, num_max+1), 1)
-    vpm = np.random.uniform(vpm_min ,vpm_max, 1) # 1 for the same, num for different
+    num = 3#np.random.choice(np.arange(num_min, num_max+1), 1)
+    r = np.random.uniform(r_min, r_max, num)
+    vem = vem_value
+    vpm_limit = sin(np.pi/num)*vem_value
+    vpm_min2 = vpm_limit + 0.5
+    vpm_max2 = min(vpm_limit*3, vpm_max_end)
     while 1:
         alpha = np.sort(np.random.uniform(0, 2*np.pi, num))
-        r = np.random.uniform(r_min, r_max, num)
-        x = r * np.cos(alpha)
-        y = r * np.sin(alpha)
-        ppw = np.vstack((x,y)).T
-        pew = np.array([0,0]) 
-        vem = vem_value
-        flag = surround_judge(pew,ppw,vem,vpm)
+        vpm = np.random.uniform(vpm_min2 ,vpm_max2, 1) # 1 for the same, num for different
+        vpm = vpm * np.ones(num)
+        lam = vpm/vem
+        theta = 2*np.arcsin(lam)
+        flag = surround_judge_alpha(alpha, theta)
         if flag == 1:
             break
     dc = np.random.uniform(dc_min,dc_max,1) #capture radius
@@ -189,7 +200,12 @@ def gen_case(rate = 1, k = 1.9, m = 7):
         k = np.random.uniform(1,2,1) #1.9 #parameter in beta equation
     if m == 0:
         m = np.random.uniform(3,7,1) #7 #parameter in delta equation
+    x = r * np.cos(alpha)
+    y = r * np.sin(alpha)
+    ppw = np.vstack((x,y)).T
+    pew = np.array([0,0]) 
     case = Case(pew, ppw, vem, vpm, dc, ti, k, m)
+    print(num, vpm)
     return case
 
 def handle_close(evt):
@@ -294,6 +310,8 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
 
     final_danger_num = len(r[r<danger_dis*1.7])
     if final_danger_num != 0:
+        if it<iteration:
+            print(danger_dis*1.7, 3*dc, np.sort(r), pew)
         # print(final_danger_num, np.sort(r)[final_danger_num:]/danger_dis[0])
         if ani != 0:
             print('final:',final_danger_num)
@@ -369,7 +387,7 @@ if __name__ == '__main__':
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    print(capture_test(func=ev_lambda_test, loop=1000, pursuer=-1),ev_lambda_test)
+    print(capture_test(func=ev_lambda_test, loop=10, pursuer=-1),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
     end = time.time()
     print("time spent: {} s".format(round(end - start,2)))
