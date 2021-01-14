@@ -59,9 +59,19 @@
         
 #     print()    
 #     print('Time taken = {} seconds'.format(time.time() - starttime))
-pursuer = -1
-danger_num = 1
-if pursuer == -1 and (danger_num==1 or danger_num==2):
-    print('yes')
-else:
-    print('no')
+# pursuer = -1
+# danger_num = 1
+# if pursuer == -1 and (danger_num==1 or danger_num==2):
+#     print('yes')
+# else:
+#     print('no')
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+ppw = np.array([[-88.26685766,  42.56369651] ,[-82.91921969 , 44.06974171],
+ [-87.37702023  ,37.07892974],
+ [-33.13012373 ,  7.45317138]])
+
+plt.scatter(ppw[:,0], ppw[:,1], marker = "^", s = 15,  alpha = 1)
+plt.show()

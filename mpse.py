@@ -208,9 +208,9 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     print(num, vpm)
     return case
 
-def handle_close(evt):
-    print('Closed Figure!')
-    sys.exit()
+# def handle_close(evt):
+#     print('Closed Figure!')
+#     sys.exit()
 
 def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     "get reward, pursuer=-1 for danger_num go back"
@@ -248,7 +248,7 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
 
     if ani != 0:
         fig = plt.figure()
-        fig.canvas.mpl_connect('close_event', handle_close)
+        # fig.canvas.mpl_connect('close_event', handle_close)
         plt.axis('equal')
         plt.axis([-135, 135, -100, 100])
         plt.scatter(ppw[:,0], ppw[:,1], marker = "^", s = 15, c = colors[0:num], alpha = 1)
@@ -298,11 +298,13 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
             plt.pause(0.001)
 
         if np.min(r)<dc:
-            # print('captured!')
+            if ani != 0:
+                print('captured!')
             it = iteration*2 - it #make it as reward, the smaller the better
             break
-        if (np.max(epsilon_sort)>1.2 and np.min(r)>3*dc) or np.linalg.norm(pew-pew_ini)>r_max_ini*1.5 :
-            # print('escaped!')
+        if np.min(r)>3*dc and (np.max(epsilon_sort)>1.2 or np.linalg.norm(pew-pew_ini)>r_max_ini*1.5) :
+            if ani != 0:
+                print('escaped!')
             break
     # if it == iteration or it < 5:
     #     if pursuer == 0:
@@ -311,12 +313,12 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     final_danger_num = len(r[r<danger_dis*1.7])
     if final_danger_num != 0:
         if it<iteration:
-            print(danger_dis*1.7, 3*dc, np.sort(r), pew)
+            print(danger_dis*1.7, 3*dc, np.sort(r), pew, ppw)
         # print(final_danger_num, np.sort(r)[final_danger_num:]/danger_dis[0])
         if ani != 0:
             print('final:',final_danger_num)
-    if ani != 0:
-        plt.show()
+    # if ani != 0:
+        # plt.show()
     return(it, final_danger_num)
 
 # testeq0 = lambda r,tri,dc,ep,ep2: -r*tri/((r-dc))
@@ -387,7 +389,8 @@ if __name__ == '__main__':
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    print(capture_test(func=ev_lambda_test, loop=10, pursuer=-1),ev_lambda_test)
+    for i in range(1):
+        print(capture_test(func=ev_lambda_test, loop=10, pursuer=-1),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
     end = time.time()
     print("time spent: {} s".format(round(end - start,2)))
