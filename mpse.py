@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import time
 def sin(x):
     return np.sin(x)
 def cos(x):
@@ -169,8 +170,9 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     dc_max_end = 4
     dc_max = weight_boundray(dc_max_start, dc_max_end, rate)
 
+    num = np.random.choice(np.arange(num_min, num_max+1), 1)
+    vpm = np.random.uniform(vpm_min ,vpm_max, 1) # 1 for the same, num for different
     while 1:
-        num = np.random.choice(np.arange(num_min, num_max+1), 1)
         alpha = np.sort(np.random.uniform(0, 2*np.pi, num))
         r = np.random.uniform(r_min, r_max, num)
         x = r * np.cos(alpha)
@@ -178,7 +180,6 @@ def gen_case(rate = 1, k = 1.9, m = 7):
         ppw = np.vstack((x,y)).T
         pew = np.array([0,0]) 
         vem = vem_value
-        vpm = np.random.uniform(vpm_min ,vpm_max, 1) # 1 for the same, num for different
         flag = surround_judge(pew,ppw,vem,vpm)
         if flag == 1:
             break
@@ -253,10 +254,11 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
 
         #evader strategy
         if pursuer == -1 and (danger_num==1 or danger_num==2):#use danger_num go back
+            danger_ev_lambda = EvLambda('-(r+0)*tri/(r-dc)**1.1')
             if danger_num == 1:
-                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda)
+                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,danger_ev_lambda)
             else:
-                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda)
+                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,EvLambda('-(r+0)*tri/(r-dc)**1.2'))
         else:
             ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda)
             
@@ -343,6 +345,7 @@ def get_list_capture_rate(lambda_list, loop = 1000):
 
 if __name__ == '__main__':
     # np.random.seed(0)
+    start = time.time()
     good_ev_lambda_list = get_ev_lambda_list('-r*tri/(r-dc)',
     ' tri*(4.66*dc - vem*(minr - (vpm*(ep2 + r))**(2*dc/vpm)))/vem ',
     ' tri*(1.47*dc - vem*(minr - (vpm*(ep2 + r))**(2*dc/vpm)))/vem ',
@@ -366,5 +369,7 @@ if __name__ == '__main__':
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    print(capture_test(func=ev_lambda_test, loop=1),ev_lambda_test)
+    print(capture_test(func=ev_lambda_test, loop=1000, pursuer=-1),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
+    end = time.time()
+    print("time spent: {} s".format(round(end - start,2)))
