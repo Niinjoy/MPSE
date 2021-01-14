@@ -104,11 +104,11 @@ stats.register("max", np.max)
 
 import mpse
 iteration = 1000 #maximun time iteration
-dev = 1
+dev = 0
 if dev == 0:
     evtime = 3
-    n_pop = 200
-    n_gen = 150
+    n_pop = 400
+    n_gen = 200
     loop = 1000
 else: # develop mode
     evtime = 3
@@ -132,9 +132,9 @@ def evaluate(ind_and_gen):
     for i in range(evtime):
         it, danger_num = mpse.get_reward(case_list[i+gen*evtime],iteration,func_vec)
         if danger_num == 1:
-            it = it + iteration * 4
-        if danger_num == 2:
             it = it + iteration * 2
+        if danger_num == 2:
+            it = it + iteration * 1
         itsum = itsum + it
     return itsum/evtime,
 
