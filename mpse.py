@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 import time
 import multiprocessing
+from functools import partial
 
 def sin(x):
     return np.sin(x)
@@ -226,9 +227,7 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     m = case.m
 
     num = ppw.shape[0] #number of pursuers
-    vpm = vpm * np.ones(num)
-    lam = vpm/vem
-    theta = 2*np.arcsin(lam)
+    theta = 2*np.arcsin(vpm/vem)
     [alpha,r] = polecoor(ppw[:,0] - pew[0], ppw[:,1] - pew[1])
     index = np.argsort(alpha)
     index_reverse = np.argsort(index)
@@ -329,22 +328,21 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
 def capture_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, k = 1.9, m = 7, pursuer = 0):
     "test the capture rate"
     # func_vec = np.vectorize(func)
-    capture = 0
-    danger_num_1 = 0 # number of danger_num == 1
-    danger_num_2 = 0 # number of danger_num == 2
     ani = 0
     if loop == 0: #run one time with animation
         loop = 1
         ani = 1
     case_list = [gen_case(rate, k, m) for _ in range(loop)]
-    for i in range(loop):
-        it, danger_num = get_reward(case_list[i],iteration,func,ani,pursuer)
-        if it>iteration:
-            capture = capture + 1
-        if danger_num == 1:
-            danger_num_1 = danger_num_1 + 1
-        if danger_num == 2:
-            danger_num_2 = danger_num_2 + 1
+    get_reward_case = partial(get_reward, iteration=iteration,inputeq=func,ani=ani,pursuer=pursuer)
+    myPool = multiprocessing.Pool(multiprocessing.cpu_count())
+    pool_tuple = myPool.map(get_reward_case, case_list)
+    myPool.close()
+    myPool.join()
+    it_list = np.array([i[0] for i in pool_tuple])
+    danger_num_list = np.array([i[1] for i in pool_tuple])
+    capture = len(it_list[it_list>iteration])
+    danger_num_1 = len(danger_num_list[danger_num_list==1])
+    danger_num_2 = len(danger_num_list[danger_num_list==2])
     return(capture/loop, [danger_num_1/loop, danger_num_2/loop])
 
 def get_ev_lambda_list(*param):
@@ -392,7 +390,7 @@ if __name__ == '__main__':
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    print(capture_test(func=ev_lambda_test, loop=1000, pursuer=-1),ev_lambda_test)
+    print(capture_test(func=ev_lambda_test, loop=1000, pursuer=0),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
     end = time.time()
     print("time spent: {} s".format(round(end - start,2)))
