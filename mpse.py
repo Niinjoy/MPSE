@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import time
+import multiprocessing
+
 def sin(x):
     return np.sin(x)
 def cos(x):
@@ -312,11 +314,12 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
 
     final_danger_num = len(r[r<danger_dis*1.7])
     if final_danger_num != 0:
-        if it<iteration:
-            print(danger_dis*1.7, 3*dc, np.sort(r), pew, ppw)
-        # print(final_danger_num, np.sort(r)[final_danger_num:]/danger_dis[0])
         if ani != 0:
             print('final:',final_danger_num)
+        if it<iteration:#sometimes final_danger_dis > escape_dis
+            final_danger_num = 0
+            # print(danger_dis*1.7, 3*dc, np.sort(r), pew, ppw)
+        # print(final_danger_num, np.sort(r)[final_danger_num:]/danger_dis[0])
     # if ani != 0:
         # plt.show()
     return(it, final_danger_num)
@@ -389,8 +392,7 @@ if __name__ == '__main__':
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    for i in range(1):
-        print(capture_test(func=ev_lambda_test, loop=10, pursuer=-1),ev_lambda_test)
+    print(capture_test(func=ev_lambda_test, loop=1000, pursuer=-1),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
     end = time.time()
     print("time spent: {} s".format(round(end - start,2)))
