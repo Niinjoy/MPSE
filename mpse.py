@@ -179,18 +179,18 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     dc_max_end = 4
     dc_max = weight_boundray(dc_max_start, dc_max_end, rate)
 
-    num = 3#np.random.choice(np.arange(num_min, num_max+1), 1)
+    num = np.random.choice(np.arange(num_min, num_max+1), 1)
     r = np.random.uniform(r_min, r_max, num)
     vem = vem_value
-    vpm_limit = sin(np.pi/num)*vem_value
-    vpm_min2 = vpm_limit + 0.5
-    vpm_max2 = min(vpm_limit*3, vpm_max_end)
+    theta_limit = 2*np.pi/num
+    theta_min = theta_limit + np.pi/36
+    theta_max = theta_limit + np.pi/6
+    theta = np.random.uniform(theta_min ,theta_max, 1) # 1 for the same, num for different
+    vpm = vem*np.sin(theta/2)
+    print(num, theta/np.pi*180, vpm)
+    vpm = vpm * np.ones(num)
     while 1:
         alpha = np.sort(np.random.uniform(0, 2*np.pi, num))
-        vpm = np.random.uniform(vpm_min2 ,vpm_max2, 1) # 1 for the same, num for different
-        vpm = vpm * np.ones(num)
-        lam = vpm/vem
-        theta = 2*np.arcsin(lam)
         flag = surround_judge_alpha(alpha, theta)
         if flag == 1:
             break
@@ -205,12 +205,11 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     ppw = np.vstack((x,y)).T
     pew = np.array([0,0]) 
     case = Case(pew, ppw, vem, vpm, dc, ti, k, m)
-    print(num, vpm)
     return case
 
-# def handle_close(evt):
-#     print('Closed Figure!')
-#     sys.exit()
+def handle_close(evt):
+    print('Closed Figure!')
+    sys.exit()
 
 def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     "get reward, pursuer=-1 for danger_num go back"
@@ -248,7 +247,7 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
 
     if ani != 0:
         fig = plt.figure()
-        # fig.canvas.mpl_connect('close_event', handle_close)
+        fig.canvas.mpl_connect('close_event', handle_close)
         plt.axis('equal')
         plt.axis([-135, 135, -100, 100])
         plt.scatter(ppw[:,0], ppw[:,1], marker = "^", s = 15, c = colors[0:num], alpha = 1)
@@ -333,9 +332,9 @@ def capture_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, 
     if loop == 0: #run one time with animation
         loop = 1
         ani = 1
-    for _ in range(loop):
-        case = gen_case(rate, k, m)
-        it, danger_num = get_reward(case,iteration,func,ani,pursuer)
+    case_list = [gen_case(rate, k, m) for _ in range(loop)]
+    for i in range(loop):
+        it, danger_num = get_reward(case_list[i],iteration,func,ani,pursuer)
         if it>iteration:
             capture = capture + 1
         if danger_num == 1:
