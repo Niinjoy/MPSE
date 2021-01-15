@@ -179,21 +179,22 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     dc_max_end = 4
     dc_max = weight_boundray(dc_max_start, dc_max_end, rate)
 
-    num = np.random.choice(np.arange(num_min, num_max+1), 1)
-    r = np.random.uniform(r_min, r_max, num)
     vem = vem_value
-    theta_limit = 2*np.pi/num
-    theta_min = theta_limit + np.pi/36
-    theta_max = theta_limit + np.pi/6
-    theta = np.random.uniform(theta_min ,theta_max, 1) # 1 for the same, num for different
-    vpm = vem*np.sin(theta/2)
-    print(num, theta/np.pi*180, vpm)
+    num = np.random.choice(np.arange(num_min, num_max+1), 1)
+    if num == 3: # special deal for num=3, vpm should biger than 36.4
+        vpm_limit = vem*np.sin(np.pi/num)+0.5
+        vpm_min = max(vpm_min,vpm_limit)
+        vpm_max = max(vpm_min+0.5, vpm_max)
+    vpm = np.random.uniform(vpm_min, vpm_max, 1) # 1 for the same, num for different
+    # print(num, vpm)
     vpm = vpm * np.ones(num)
+    theta = 2*np.arcsin(vpm/vem)
     while 1:
         alpha = np.sort(np.random.uniform(0, 2*np.pi, num))
         flag = surround_judge_alpha(alpha, theta)
         if flag == 1:
             break
+    r = np.random.uniform(r_min, r_max, num)
     dc = np.random.uniform(dc_min,dc_max,1) #capture radius
     ti = 0.01 #time interval
     if k == 0:
