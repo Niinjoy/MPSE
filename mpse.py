@@ -24,9 +24,14 @@ def veeq(r,alpha,dc,vem,epsilon,vpm,forceeq):
     "calc ve"
     force = np.zeros((2,r.shape[0]))
     force_sum = np.zeros(2)
+    ep2 = down(epsilon)
+    minr = np.min(r)
+    maxr = np.max(r)
+    avgr = np.mean(r)
+    stdr = np.std(r)
     for i in range(2):
         tri = np.cos(alpha) if i==0 else np.sin(alpha)
-        force[i] = forceeq(r, tri, dc, epsilon, down(epsilon), vpm, vem, np.min(r), np.max(r), np.mean(r), np.std(r))
+        force[i] = forceeq(r, tri, dc, epsilon, ep2, vpm, vem, minr, maxr, avgr, stdr)
     force_sum = np.sum(force, axis=1) + np.random.uniform(1e-10, 1e-8, 2) * np.random.choice([-1,1], 2)
     ve = vem*force_sum/np.linalg.norm(force_sum)
     return ve
@@ -270,14 +275,15 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
                 print(danger_num)
 
         #evader strategy
-        if pursuer == -1 and (danger_num==1 or danger_num==2):#use danger_num go back
-            danger_ev_lambda = EvLambda('-(r+0)*tri/(r-dc)**1.1')
+        ev_lambda_use = ev_lambda
+        ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda_use)
+        if pursuer == -1:#use danger_num go back
             if danger_num == 1:
-                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,danger_ev_lambda)
-            else:
-                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,EvLambda('-(r+0)*tri/(r-dc)**1.2'))
-        else:
-            ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda)
+                ev_lambda_use = EvLambda('-(r+0)*tri/(r-dc)**1.1')
+                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda_use)
+            if danger_num == 2:
+                ev_lambda_use = EvLambda('-(r+0)*tri/(r-dc)**1.2')
+                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda_use)
             
         #update position
         ppw = ppw + vp*ti
@@ -323,8 +329,6 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
         # plt.show()
     return(it, final_danger_num)
 
-# testeq0 = lambda r,tri,dc,ep,ep2: -r*tri/((r-dc))
-
 def capture_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, k = 1.9, m = 7, pursuer = 0):
     "test the capture rate"
     # func_vec = np.vectorize(func)
@@ -332,7 +336,10 @@ def capture_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, 
     if loop == 0: #run one time with animation
         loop = 1
         ani = 1
+    # start = time.time()
     case_list = [gen_case(rate, k, m) for _ in range(loop)]
+    # end = time.time()
+    # print("case, generated, time spent: {} s".format(round(end - start,2)))
     get_reward_case = partial(get_reward, iteration=iteration,inputeq=func,ani=ani,pursuer=pursuer)
     myPool = multiprocessing.Pool(multiprocessing.cpu_count())
     pool_tuple = myPool.map(get_reward_case, case_list)
