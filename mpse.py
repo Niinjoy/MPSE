@@ -328,8 +328,9 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
             final_danger_num = 0
             # print(danger_dis*1.7, 3*dc, np.sort(r), pew, ppw)
         # print(final_danger_num, np.sort(r)[final_danger_num:]/danger_dis[0])
-    # if ani != 0:
-        # plt.show()
+    if ani != 0:
+        plt.show()
+        plt.close()
     return(it, final_danger_num)
 
 def capture_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, k = 1.9, m = 7, pursuer = 0):
@@ -400,7 +401,7 @@ if __name__ == '__main__':
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    print(capture_test(func=ev_lambda_test, loop=1000, pursuer=-1),ev_lambda_test)
+    print(capture_test(func=ev_lambda_test, loop=0, pursuer=-1),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
     end = time.time()
     print("time spent: {} s".format(round(end - start,2)))
