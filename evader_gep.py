@@ -106,14 +106,14 @@ import mpse
 iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
-    evtime = 3
-    n_pop = 400
+    evtime = 5
+    n_pop = 600
     n_gen = 200
     loop = 1000
 else: # develop mode
-    evtime = 3
-    n_pop = 10
-    n_gen = 1
+    evtime = 1
+    n_pop = 5
+    n_gen = 2
     loop = 1
 rate = 1
 previous_gen = -1
@@ -151,12 +151,15 @@ print("time spent: {} s".format(round(end - start,2)))
 
 print('\nSymplified best individual: ')
 symplified_best_list = []
+result_list = []
 for i in range(len(hof)):
     symplified_best = gep.simplify(hof[i], sym_map)
     if symplified_best not in symplified_best_list:
         symplified_best_list.append(symplified_best)
-        print(mpse.capture_test(func=np.vectorize(toolbox.compile(hof[i])), loop=loop),'  ', symplified_best)
+        result = mpse.capture_test(func=np.vectorize(toolbox.compile(hof[i])), loop=loop)
+        print(result,'  ', symplified_best)
+        result_list.append(result)
 
 print('\n', len(symplified_best_list), 'different items')
-for i in symplified_best_list:
-    print("\'" + str(i) + "\',")
+for i in range(len(symplified_best_list)):
+    print("\'" + str(symplified_best_list[i]) + "\', #" + str(result_list[i]))

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import time
-import multiprocessing
+import pathos.multiprocessing as mp
 from functools import partial
 
 def sin(x):
@@ -168,10 +168,10 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     num_max_end = 10
     num_max = int(round(weight_boundray(num_max_start, num_max_end, rate)))
 
-    r_min_start = 90
-    r_min_end = 70
+    r_min_start = 60
+    r_min_end = 40
     r_min = weight_boundray(r_min_start, r_min_end, rate)
-    r_max = 100
+    r_max = 80
 
     vem_value = 42
     
@@ -351,10 +351,11 @@ def capture_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, 
     if ani == 1:#animation conflict with multiprocessing
         pool_tuple = get_reward_case(case_list[0])
     else:
-        myPool = multiprocessing.Pool(multiprocessing.cpu_count())
+        myPool = mp.Pool(mp.cpu_count())
         pool_tuple = myPool.map(get_reward_case, case_list)
         myPool.close()
         myPool.join()
+        # pool_tuple = map(get_reward_case, case_list)
     it_list = np.array([i[0] for i in pool_tuple])
     danger_num_list = np.array([i[1] for i in pool_tuple])
     capture = len(it_list[it_list>iteration])
@@ -382,7 +383,7 @@ def get_list_capture_rate(lambda_list, loop = 1000):
         print(loop, 'times', capture_test(lambda_list[i], loop), '  ', lambda_list[i])
 
 if __name__ == '__main__':
-    np.random.seed(1)
+    # np.random.seed(1)
     start = time.time()
     good_ev_lambda_list = get_ev_lambda_list('-r*tri/(r-dc)',
     ' tri*(4.66*dc - vem*(minr - (vpm*(ep2 + r))**(2*dc/vpm)))/vem ',
@@ -407,7 +408,7 @@ if __name__ == '__main__':
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    print(capture_test(func=ev_lambda_test, loop=0, pursuer=-1),ev_lambda_test)
+    print(capture_test(func=ev_lambda_test, loop=10, pursuer=0),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
     end = time.time()
     print("time spent: {} s".format(round(end - start,2)))

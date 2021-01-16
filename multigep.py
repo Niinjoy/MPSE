@@ -10,7 +10,7 @@ can be used as a reference.
 import deap
 import random
 import warnings
-import multiprocessing
+import pathos.multiprocessing as mp
 import time
 
 def _validate_basic_toolbox(tb):
@@ -94,7 +94,7 @@ def gep_multi(population, toolbox, n_generations=100, n_elites=1,
     logbook = deap.tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    myPool = multiprocessing.Pool(multiprocessing.cpu_count())
+    myPool = mp.Pool(mp.cpu_count())
     for gen in range(n_generations + 1):
         time1 = time.time()
         # evaluate: only evaluate the invalid ones, i.e., no need to reevaluate the unchanged ones
