@@ -282,8 +282,11 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
                 ev_lambda_use = EvLambda('-(r+0)*tri/(r-dc)**1.1')
                 ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda_use)
             if danger_num == 2:
-                ev_lambda_use = EvLambda('-(r+0)*tri/(r-dc)**1.2')
-                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda_use)
+                # ev_lambda_use = EvLambda('-(r+0)*tri/(r-dc)**1.2')
+                # ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda_use)
+                danger_alpha = alpha_sort[np.argwhere(r_sort<danger_dis)].flatten()#two danger alpha
+                alpha_e = np.mean(danger_alpha) - (danger_alpha[1]-danger_alpha[0] < np.pi)*np.pi# the back direction
+                ve = vem*np.array([np.cos(alpha_e),np.sin(alpha_e)])
             
         #update position
         ppw = ppw + vp*ti
@@ -397,7 +400,7 @@ if __name__ == '__main__':
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    print(capture_test(func=ev_lambda_test, loop=1000, pursuer=0),ev_lambda_test)
+    print(capture_test(func=ev_lambda_test, loop=1000, pursuer=-1),ev_lambda_test)
     # print(capture_test(func=good_pu_lambda_list[0], loop=1000, pursuer=1))
     end = time.time()
     print("time spent: {} s".format(round(end - start,2)))
