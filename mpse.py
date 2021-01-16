@@ -168,10 +168,10 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     num_max_end = 10
     num_max = int(round(weight_boundray(num_max_start, num_max_end, rate)))
 
-    r_min_start = 60
-    r_min_end = 40
+    r_min_start = 90
+    r_min_end = 70
     r_min = weight_boundray(r_min_start, r_min_end, rate)
-    r_max = 80
+    r_max = 100
 
     vem_value = 42
     
