@@ -260,6 +260,7 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
         plt.scatter(ppw[:,0], ppw[:,1], marker = "^", s = 15, c = colors[0:num], alpha = 1)
         plt.scatter(pew[0],pew[1], marker="x",  s=15, c = 'k', alpha = 1)
         plt.pause(0.001)
+        print(dc)
 
     it = 0 #iteration number
     while it < iteration:
@@ -272,7 +273,7 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
         danger_num = len(r[r<danger_dis])
         if danger_num !=0:
             if ani != 0:
-                print(danger_num)
+                print(danger_num,end=" ")
 
         #evader strategy
         ev_lambda_use = ev_lambda
@@ -287,6 +288,7 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
                 danger_alpha = alpha_sort[np.argwhere(r_sort<danger_dis)].flatten()#two danger alpha
                 alpha_e = np.mean(danger_alpha) - (danger_alpha[1]-danger_alpha[0] < np.pi)*np.pi# the back direction
                 ve = vem*np.array([np.cos(alpha_e),np.sin(alpha_e)])
+                print(ve)
             
         #update position
         ppw = ppw + vp*ti
@@ -324,6 +326,8 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     if final_danger_num != 0:
         if ani != 0:
             print('final:',final_danger_num)
+            if final_danger_num == 2:
+                print(pew,ppw,vem,vpm,alpha,r,dc)
         if it<iteration:#sometimes final_danger_dis > escape_dis
             final_danger_num = 0
             # print(danger_dis*1.7, 3*dc, np.sort(r), pew, ppw)
@@ -345,10 +349,13 @@ def capture_test(func = def_ev_lambda, loop = 1000, rate = 1, iteration = 1000, 
     # end = time.time()
     # print("case, generated, time spent: {} s".format(round(end - start,2)))
     get_reward_case = partial(get_reward, iteration=iteration,inputeq=func,ani=ani,pursuer=pursuer)
-    myPool = multiprocessing.Pool(multiprocessing.cpu_count())
-    pool_tuple = myPool.map(get_reward_case, case_list)
-    myPool.close()
-    myPool.join()
+    if ani == 1:#animation conflict with multiprocessing
+        pool_tuple = get_reward_case(case_list[0])
+    else:
+        myPool = multiprocessing.Pool(multiprocessing.cpu_count())
+        pool_tuple = myPool.map(get_reward_case, case_list)
+        myPool.close()
+        myPool.join()
     it_list = np.array([i[0] for i in pool_tuple])
     danger_num_list = np.array([i[1] for i in pool_tuple])
     capture = len(it_list[it_list>iteration])
@@ -376,7 +383,7 @@ def get_list_capture_rate(lambda_list, loop = 1000):
         print(loop, 'times', capture_test(lambda_list[i], loop), '  ', lambda_list[i])
 
 if __name__ == '__main__':
-    # np.random.seed(0)
+    np.random.seed(1)
     start = time.time()
     good_ev_lambda_list = get_ev_lambda_list('-r*tri/(r-dc)',
     ' tri*(4.66*dc - vem*(minr - (vpm*(ep2 + r))**(2*dc/vpm)))/vem ',
