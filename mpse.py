@@ -260,7 +260,6 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
         plt.scatter(ppw[:,0], ppw[:,1], marker = "^", s = 15, c = colors[0:num], alpha = 1)
         plt.scatter(pew[0],pew[1], marker="x",  s=15, c = 'k', alpha = 1)
         plt.pause(0.001)
-        print(dc)
 
     it = 0 #iteration number
     while it < iteration:
@@ -283,12 +282,12 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
                 ev_lambda_use = EvLambda('-(r+0)*tri/(r-dc)**1.1')
                 ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda_use)
             if danger_num == 2:
-                # ev_lambda_use = EvLambda('-(r+0)*tri/(r-dc)**1.2')
-                # ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda_use)
-                danger_alpha = alpha_sort[np.argwhere(r_sort<danger_dis)].flatten()#two danger alpha
-                alpha_e = np.mean(danger_alpha) - (danger_alpha[1]-danger_alpha[0] < np.pi)*np.pi# the back direction
-                ve = vem*np.array([np.cos(alpha_e),np.sin(alpha_e)])
-                print(ve)
+                ev_lambda_use = EvLambda('-(r+0)*tri/(r-dc)**1.2')
+                ve = veeq(r_sort,alpha_sort,dc,vem,epsilon_sort,vpm_sort,ev_lambda_use)
+                # danger_alpha = alpha_sort[np.argwhere(r_sort<danger_dis)].flatten()#two danger alpha
+                # alpha_e = np.mean(danger_alpha) - (danger_alpha[1]-danger_alpha[0] < np.pi)*np.pi# the back direction
+                # ve = vem*np.array([np.cos(alpha_e),np.sin(alpha_e)])
+                # print(ve, np.sort(r_sort))
             
         #update position
         ppw = ppw + vp*ti
@@ -326,8 +325,8 @@ def get_reward(case,iteration,inputeq,ani = 0,pursuer=0):
     if final_danger_num != 0:
         if ani != 0:
             print('final:',final_danger_num)
-            if final_danger_num == 2:
-                print(pew,ppw,vem,vpm,alpha,r,dc)
+            # if final_danger_num == 2:
+                # print(pew,ppw,vem,vpm,alpha,r,dc)
         if it<iteration:#sometimes final_danger_dis > escape_dis
             final_danger_num = 0
             # print(danger_dis*1.7, 3*dc, np.sort(r), pew, ppw)

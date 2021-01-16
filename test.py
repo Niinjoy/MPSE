@@ -75,16 +75,18 @@ import numpy as np
 
 # plt.scatter(ppw[:,0], ppw[:,1], marker = "^", s = 15,  alpha = 1)
 # plt.show()
-r1 = '37.6989641   3.86027044  7.29185873  3.86512358'
-a1 = '0.31947293 2.19813882 3.42581386 4.70495416'
+# r1 = '37.6989641   3.86027044  7.29185873  3.86512358'
+# a1 = '0.31947293 2.19813882 3.42581386 4.70495416'
 
-r_sort = np.array([37.6989641,   3.86027044,  7.29185873,  3.86512358])
-alpha_sort = np.array([float(n) for n in a1.split()])
-danger_dis = 4
-danger_alpha = alpha_sort[np.argwhere(r_sort<danger_dis)].flatten()
-print(danger_alpha)
-alpha_e = np.mean(danger_alpha) - (danger_alpha[1]-danger_alpha[0] < np.pi)*np.pi
-print(alpha_e)
-vem = 42
-ve = vem*np.array([np.cos(alpha_e),np.sin(alpha_e)])
-print(ve)
+# r_sort = np.array([37.6989641,   3.86027044,  7.29185873,  3.86512358])
+# alpha_sort = np.array([float(n) for n in a1.split()])
+# danger_dis = 4
+# danger_alpha = alpha_sort[np.argwhere(r_sort<danger_dis)].flatten()
+# print(danger_alpha)
+# alpha_e = np.mean(danger_alpha) - (danger_alpha[1]-danger_alpha[0] < np.pi)*np.pi
+# print(alpha_e)
+# vem = 42
+# ve = vem*np.array([np.cos(alpha_e),np.sin(alpha_e)])
+# print(ve)
+for n in range(1,20):
+    print(np.sqrt(0.3208*n**2+1.748*n+5.29))
