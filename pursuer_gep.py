@@ -6,6 +6,8 @@ import random
 import operator
 import sympy as sp
 import math
+import multigep
+import time
 
 # for reproduction
 # s = 0
@@ -33,13 +35,9 @@ sym_map = {
 }
 
 def protected_pow(x1, x2):
-    result = np.power(float(abs(x1)),x2)
-    # try:
-    #     result = abs(x1)**x2
-    # except:
-    #     result = 2**20
-    # else:
-    #     result = abs(x1)**x2
+    result = np.power(np.max([float(abs(x1)), 1e-6]),np.median([x2,20,-20]))
+    # if math.isinf(result) == True:
+    #     print(x1,x2,'inf!')
     return np.min([result, 2**20])
 
 def protected_div(x1, x2):
@@ -50,6 +48,7 @@ def protected_div(x1, x2):
 import operator 
 
 pset = gep.PrimitiveSet('Main', input_names=['adep', 'r', 'rater','dc','ep','ep2','vpm','vem','minr','maxr','avgr','stdr'])
+pset.add_rnc_terminal()
 pset.add_function(operator.add, 2)
 pset.add_function(operator.sub, 2)
 pset.add_function(operator.mul, 2)
@@ -58,14 +57,15 @@ pset.add_function(protected_pow, 2)
 pset.add_function(operator.abs, 1)
 pset.add_function(math.sin, 1)
 pset.add_function(math.cos, 1)
-pset.add_rnc_terminal()
+pset.add_constant_terminal(np.pi)
+pset.add_constant_terminal(np.e)
 
 from deap import creator, base, tools
 
 creator.create("FitnessMin", base.Fitness, weights=(1,))  # to minimize the objective (fitness)
 creator.create("Individual", gep.Chromosome, fitness=creator.FitnessMin)
 
-h = 8 # head length
+h = 10 # head length
 n_genes = 2   # number of genes in a chromosome
 r = 8   # length of the RNC array
 
@@ -80,7 +80,7 @@ toolbox.register('compile', gep.compile_, pset=pset)
 
 toolbox.register('select', tools.selTournament, tournsize=3)
 # 1. general operators
-toolbox.register('mut_uniform', gep.mutate_uniform, pset=pset, ind_pb=0.05, pb=1)
+toolbox.register('mut_uniform', gep.mutate_uniform, pset=pset, ind_pb=2 / (2 * h + 1), pb=1)
 toolbox.register('mut_invert', gep.invert, pb=0.1)
 toolbox.register('mut_is_transpose', gep.is_transpose, pb=0.1)
 toolbox.register('mut_ris_transpose', gep.ris_transpose, pb=0.1)
@@ -104,33 +104,38 @@ stats.register("max", np.max)
 
 import mpse
 iteration = 1000 #maximun time iteration
-evtime = 5
-# size of population and number of generations
-n_pop = 300
-n_gen = 300
-
+dev = 0
+if dev == 0:
+    evtime = 5
+    n_pop = 600
+    n_gen = 200
+    loop = 1000
+else: # develop mode
+    evtime = 1
+    n_pop = 5
+    n_gen = 2
+    loop = 1
+rate = 1
 previous_gen = -1
-case_list = [None for _ in range(evtime)]
+start = time.time()
+case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
+end = time.time()
+print("time spent for case generation: {} s".format(round(end - start,2)))
 
-def evaluate(individual, gen):
+def evaluate(ind_and_gen):
     """Evalute the fitness of an individual: MAE (mean absolute error)"""
-    global previous_gen, case_list
+    individual = ind_and_gen[0]
+    gen = ind_and_gen[1]
     func = toolbox.compile(individual)
     func_vec = np.vectorize(func)
     itsum = 0
     for i in range(evtime):
-        if gen != previous_gen:
-            case_list[i] = mpse.gen_case(1)
-            # case_list[i] = mpse.gen_case(gen/n_gen)
-            # print('new gen')
-        it= mpse.get_reward(case_list[i],iteration,func_vec,0,1)[0]
+        it= mpse.get_reward(case_list[i+gen*evtime],iteration,func_vec,0,1)[0]
         # if danger_num == 1:
         #     it = it + iteration * 2
         # if danger_num == 2:
         #     it = it + iteration * 1
         itsum = itsum + it
-    previous_gen = gen
-    # print(itsum)
     return itsum/evtime,
 
 toolbox.register('evaluate', evaluate)
@@ -139,13 +144,22 @@ pop = toolbox.population(n=n_pop)
 hof = tools.HallOfFame(10)   # only record the best 10 individuals ever found in all generations
 
 # start evolution
-pop, log = gep.gep_simple(pop, toolbox, n_generations=n_gen, n_elites=0, stats=stats, hall_of_fame=hof, verbose=True)
+start = time.time()
+pop, log = multigep.gep_multi(pop, toolbox, n_generations=n_gen, n_elites=3, stats=stats, hall_of_fame=hof, verbose=True)
+end = time.time()
+print("time spent: {} s".format(round(end - start,2)))
 
-print('Symplified best individual: ')
-symplified_best = []
+print('\nSymplified best individual: ')
+symplified_best_list = []
+result_list = []
 for i in range(len(hof)):
-    symplified_best.append(gep.simplify(hof[i], sym_map))
-    print(mpse.capture_test(func=np.vectorize(toolbox.compile(hof[i])), loop=1000, pursuer=1),'  ', symplified_best[i])
+    symplified_best = gep.simplify(hof[i], sym_map)
+    if symplified_best not in symplified_best_list:
+        symplified_best_list.append(symplified_best)
+        result = mpse.capture_test(func=np.vectorize(toolbox.compile(hof[i])), loop=loop, pursuer=1)
+        print(result,'  ', symplified_best)
+        result_list.append(result)
 
-for i in symplified_best:
-    print(i)
+print('\n', len(symplified_best_list), 'different items')
+for i in range(len(symplified_best_list)):
+    print("\'" + str(symplified_best_list[i]) + "\', #" + str(result_list[i]))
