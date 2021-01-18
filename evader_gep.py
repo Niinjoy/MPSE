@@ -131,10 +131,10 @@ def evaluate(ind_and_gen):
     itsum = 0
     for i in range(evtime):
         it, danger_num = mpse.get_reward(case_list[i+gen*evtime],iteration,func_vec)
-        if danger_num == 1:
-            it = it + iteration * 2
-        if danger_num == 2:
-            it = it + iteration * 1
+        # if danger_num == 1:
+        #     it = it + iteration * 2
+        # if danger_num == 2:
+        #     it = it + iteration * 1
         itsum = itsum + it
     return itsum/evtime,
 

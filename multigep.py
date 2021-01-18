@@ -94,7 +94,7 @@ def gep_multi(population, toolbox, n_generations=100, n_elites=1,
     logbook = deap.tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    myPool = mp.Pool(mp.cpu_count())
+    # myPool = mp.Pool(mp.cpu_count())
     for gen in range(n_generations + 1):
         time1 = time.time()
         # evaluate: only evaluate the invalid ones, i.e., no need to reevaluate the unchanged ones
@@ -104,10 +104,10 @@ def gep_multi(population, toolbox, n_generations=100, n_elites=1,
         gen_list = [gen for i in range(len(population))]
         # fitnesses = toolbox.map(toolbox.evaluate, zip(population, gen_list)) # niin edited to get gen information
         # with multiprocessing.Pool(multiprocessing.cpu_count()) as myPool:
-        # myPool = multiprocessing.Pool(multiprocessing.cpu_count())
+        myPool = mp.Pool(mp.cpu_count())
         fitnesses = myPool.map(toolbox.evaluate, zip(population, gen_list))
-        # myPool.close()
-        # myPool.join()
+        myPool.close()
+        myPool.join()
         for ind, fit in zip(population, fitnesses):
             ind.fitness.values = fit
 
@@ -143,8 +143,8 @@ def gep_multi(population, toolbox, n_generations=100, n_elites=1,
 
         # replace the current population with the offsprings
         population = elites + offspring
-    myPool.close()
-    myPool.join()
+    # myPool.close()
+    # myPool.join()
     return population, logbook
 
 
