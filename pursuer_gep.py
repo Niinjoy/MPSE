@@ -104,17 +104,17 @@ stats.register("max", np.max)
 
 import mpse
 iteration = 1000 #maximun time iteration
-dev = 0
+dev = 1
 if dev == 0:
     evtime = 5
     n_pop = 600
     n_gen = 200
     loop = 1000
 else: # develop mode
-    evtime = 1
+    evtime = 3
     n_pop = 5
-    n_gen = 2
-    loop = 1
+    n_gen = 5
+    loop = 10
 rate = 1
 previous_gen = -1
 start = time.time()
