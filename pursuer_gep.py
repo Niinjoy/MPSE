@@ -10,9 +10,9 @@ import multigep
 import time
 
 # for reproduction
-# s = 0
-# random.seed(s)
-# np.random.seed(s)
+s = 0
+random.seed(s)
+np.random.seed(s)
 
 sym_map = {
     operator.and_.__name__: sp.And,
