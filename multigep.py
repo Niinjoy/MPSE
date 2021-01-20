@@ -104,7 +104,7 @@ def gep_multi(population, toolbox, n_generations=100, n_elites=1,
         gen_list = [gen for i in range(len(population))]
         # fitnesses = toolbox.map(toolbox.evaluate, zip(population, gen_list)) # niin edited to get gen information
         # with multiprocessing.Pool(multiprocessing.cpu_count()) as myPool:
-        myPool = mp.Pool(mp.cpu_count())
+        myPool = mp.Pool(mp.cpu_count()*4)
         fitnesses = myPool.map(toolbox.evaluate, zip(population, gen_list))
         myPool.close()
         myPool.join()
