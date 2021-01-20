@@ -8,7 +8,7 @@ import sympy as sp
 import math
 import multigep
 import time
-import pathos.multiprocessing as mp
+# import pathos.multiprocessing as mp
 
 # for reproduction
 s = 0
@@ -121,7 +121,8 @@ previous_gen = -1
 start = time.time()
 case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
 end = time.time()
-print("Time spent for case generation: {} s.".format(round(end - start,2)),"Using {} CPUs.".format(mp.cpu_count()))
+print("Time spent for case generation: {} s".format(round(end - start,2)))
+# print("Time spent for case generation: {} s.".format(round(end - start,2)),"Using {} CPUs.".format(mp.cpu_count()))
 
 def evaluate(ind_and_gen):
     """Evalute the fitness of an individual: MAE (mean absolute error)"""
