@@ -55,9 +55,9 @@ pset.add_function(operator.sub, 2)
 pset.add_function(operator.mul, 2)
 pset.add_function(protected_div, 2)
 pset.add_function(protected_pow, 2)
-pset.add_function(operator.abs, 1)
-pset.add_function(math.sin, 1)
-pset.add_function(math.cos, 1)
+# pset.add_function(operator.abs, 1)
+# pset.add_function(math.sin, 1)
+# pset.add_function(math.cos, 1)
 pset.add_constant_terminal(np.pi)
 pset.add_constant_terminal(np.e)
 
@@ -108,8 +108,8 @@ iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
     evtime = 5
-    n_pop = 800
-    n_gen = 300
+    n_pop = 1000
+    n_gen = 400
     loop = 1000
     print("Using", format(mp.cpu_count()), "CPUs, estimated time", round(evtime*n_gen*n_pop/mp.cpu_count()*0.273558/60/60, 2), "h")
 else: # develop mode
@@ -121,7 +121,7 @@ rate = 1
 previous_gen = -1
 start = time.time()
 # case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
-case_num = 100
+case_num = 200
 case_list = [mpse.gen_case(rate) for _ in range(case_num)]
 index = np.random.randint(0,case_num,evtime*(n_gen+1))
 end = time.time()
