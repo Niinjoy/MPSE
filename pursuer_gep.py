@@ -8,7 +8,7 @@ import sympy as sp
 import math
 import multigep
 import time
-# import pathos.multiprocessing as mp
+import pathos.multiprocessing as mp
 
 # for reproduction
 s = 0
@@ -107,10 +107,11 @@ import mpse
 iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
-    evtime = 10
-    n_pop = 2000
-    n_gen = 400
+    evtime = 5
+    n_pop = 800
+    n_gen = 300
     loop = 1000
+    print("Using", format(mp.cpu_count()), "CPUs, estimated time", round(evtime*n_gen*n_pop/mp.cpu_count()*0.273558/60/60, 2), "h")
 else: # develop mode
     evtime = 3
     n_pop = 5
@@ -119,7 +120,10 @@ else: # develop mode
 rate = 1
 previous_gen = -1
 start = time.time()
-case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
+# case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
+case_num = 100
+case_list = [mpse.gen_case(rate) for _ in range(case_num)]
+index = np.random.randint(0,case_num,evtime*(n_gen+1))
 end = time.time()
 print("Time spent for case generation: {} s".format(round(end - start,2)))
 # print("Time spent for case generation: {} s.".format(round(end - start,2)),"Using {} CPUs.".format(mp.cpu_count()))
@@ -132,7 +136,8 @@ def evaluate(ind_and_gen):
     func_vec = np.vectorize(func)
     itsum = 0
     for i in range(evtime):
-        it= mpse.get_reward(case_list[i+gen*evtime],iteration,func_vec,0,1)[0]
+        # it= mpse.get_reward(case_list[i+gen*evtime],iteration,func_vec,0,1)[0]
+        it= mpse.get_reward(case_list[index[i+gen*evtime]],iteration,func_vec,0,1)[0]
         # if danger_num == 1:
         #     it = it + iteration * 2
         # if danger_num == 2:
