@@ -383,7 +383,6 @@ def get_list_capture_rate(lambda_list, loop = 1000):
         print(loop, 'times', capture_test(lambda_list[i], loop), '  ', lambda_list[i])
 
 if __name__ == '__main__':
-    # np.random.seed(1)
     start = time.time()
     good_ev_lambda_list = get_ev_lambda_list('-r*tri/(r-dc)',
     ' tri*(4.66*dc - vem*(minr - (vpm*(ep2 + r))**(2*dc/vpm)))/vem ',
@@ -407,10 +406,26 @@ if __name__ == '__main__':
     good_pu_lambda_list = get_pu_lambda_list('adep*minr/(dc*vem) + sin(adep)','0')
     # ev_lambda_list = get_ev_lambda_list(    )
     # get_list_capture_rate(ev_lambda_list, 1000)
+
+    # for i in range(40):
+    #     ev_lambda_test0 = EvLambda('-(r+0)*tri/(r-dc)')
+    #     ev_lambda_test = EvLambda('(tri*vpm*(maxr + stdr - vem*(dc - r)) + (avgr + r)*(dc - r))/(dc - r)')
+    #     np.random.seed(i)
+    #     cap0 = capture_test(func=ev_lambda_test0, loop=1, pursuer=0)[0]
+    #     np.random.seed(i)
+    #     cap1 = capture_test(func=ev_lambda_test, loop=1, pursuer=0)[0]
+    #     if cap1<cap0:
+    #         print(i,cap1,cap0)
+
+    ran_seed = 37 # 4 7 11 13 19 21 26 32 33 37 39
+    np.random.seed(ran_seed)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    # ev_lambda_test = EvLambda('(tri*vpm*(maxr + stdr - vem*(dc - r)) + (avgr + r)*(dc - r))/(dc - r)')
+    print(capture_test(func=ev_lambda_test, loop=0, pursuer=0),ev_lambda_test)
+    np.random.seed(ran_seed)
+    ev_lambda_test = EvLambda('(tri*vpm*(maxr + stdr - vem*(dc - r)) + (avgr + r)*(dc - r))/(dc - r)')
+    print(capture_test(func=ev_lambda_test, loop=0, pursuer=0),ev_lambda_test)
+
     pu_lambda_test = PuLambda('sin(adep) + 0.2')
-    # print(capture_test(func=ev_lambda_test, loop=1000, pursuer=0),ev_lambda_test)
-    print(capture_test(func=pu_lambda_test, loop=1000, pursuer=1),pu_lambda_test)
+    # print(capture_test(func=pu_lambda_test, loop=1000, pursuer=1),pu_lambda_test)
     end = time.time()
     print("time spent: {} s".format(round(end - start,2)))
