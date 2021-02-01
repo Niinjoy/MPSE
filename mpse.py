@@ -188,7 +188,8 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     dc_max = weight_boundray(dc_max_start, dc_max_end, rate)
 
     vem = vem_value
-    num = np.random.choice(np.arange(num_min, num_max+1), 1)
+    # num = np.random.choice(np.arange(num_min, num_max+1), 1)
+    num = 6
     if num == 3: # special deal for num=3, vpm should biger than 36.4
         vpm_limit = vem*np.sin(np.pi/num)+0.5
         vpm_min = max(vpm_min,vpm_limit)
