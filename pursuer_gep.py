@@ -107,9 +107,9 @@ import mpse
 iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
-    evtime = 3
-    n_pop = 400
-    n_gen = 200
+    evtime = 5
+    n_pop = 1000
+    n_gen = 400
     loop = 1000
     print("Using", format(mp.cpu_count()), "CPUs, estimated time", round(evtime*n_gen*n_pop/mp.cpu_count()*0.273558/60/60, 2), "h")
 else: # develop mode
