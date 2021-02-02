@@ -55,9 +55,9 @@ pset.add_function(operator.sub, 2)
 pset.add_function(operator.mul, 2)
 pset.add_function(protected_div, 2)
 pset.add_function(protected_pow, 2)
-pset.add_function(operator.abs, 1)
+# pset.add_function(operator.abs, 1)
 pset.add_function(math.sin, 1)
-pset.add_function(math.cos, 1)
+# pset.add_function(math.cos, 1)
 pset.add_constant_terminal(np.pi)
 pset.add_constant_terminal(np.e)
 
@@ -66,7 +66,7 @@ from deap import creator, base, tools
 creator.create("FitnessMin", base.Fitness, weights=(1,))  # to minimize the objective (fitness)
 creator.create("Individual", gep.Chromosome, fitness=creator.FitnessMin)
 
-h = 10 # head length
+h = 20 # head length
 n_genes = 2   # number of genes in a chromosome
 r = 8   # length of the RNC array
 
