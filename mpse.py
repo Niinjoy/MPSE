@@ -163,6 +163,61 @@ def surround_judge_alpha(alpha, theta):
 def gen_case(rate = 1, k = 1.9, m = 7):
     "generate random case, rate 0 to 1, simple to hard"
     #generate range assign by rate, con for constant
+    num_min_start = 8
+    num_min_end = 3
+    num_min = int(round(weight_boundray(num_min_start, num_min_end, rate)))
+    num_max = 10
+
+    r_min = 40
+    r_max_start = 60
+    r_max_end = 80
+    r_max = int(round(weight_boundray(r_max_start, r_max_end, rate)))
+
+    vem_value = 42
+
+    vpm_min_start = 36
+    vpm_min_end = 32
+    vpm_min = weight_boundray(vpm_min_start, vpm_min_end, rate)
+    vpm_max = 38
+
+    dc_min_start = 3
+    dc_min_end = 1
+    dc_min = weight_boundray(dc_min_start, dc_min_end, rate)
+    dc_max = 4
+
+    vem = vem_value
+    num = np.random.choice(np.arange(num_min, num_max+1), 1)
+    # num = 6
+    if num == 3: # special deal for num=3, vpm should biger than 36.4
+        vpm_limit = vem*np.sin(np.pi/num)+0.5
+        vpm_min = max(vpm_min,vpm_limit)
+        vpm_max = max(vpm_min+0.5, vpm_max)
+    vpm = np.random.uniform(vpm_min, vpm_max, 1) # 1 for the same, num for different
+    r = np.random.uniform(r_min, r_max, num)
+    dc = np.random.uniform(dc_min,dc_max,1) #capture radius
+    # print(num, vpm, dc,r)
+    vpm = vpm * np.ones(num)
+    theta = 2*np.arcsin(vpm/vem)
+    while 1:
+        alpha = np.sort(np.random.uniform(0, 2*np.pi, num))
+        flag = surround_judge_alpha(alpha, theta)
+        if flag == 1:
+            break
+    ti = 0.01 #time interval
+    if k == 0:
+        k = np.random.uniform(1,2,1) #1.9 #parameter in beta equation
+    if m == 0:
+        m = np.random.uniform(3,7,1) #7 #parameter in delta equation
+    x = r * np.cos(alpha)
+    y = r * np.sin(alpha)
+    ppw = np.vstack((x,y)).T
+    pew = np.array([0,0]) 
+    case = Case(pew, ppw, vem, vpm, dc, ti, k, m)
+    return case
+
+def gen_case_ev(rate = 1, k = 1.9, m = 7):
+    "generate random case, rate 0 to 1, simple to hard"
+    #generate range assign by rate, con for constant
     num_min = 3
     num_max_start = 4 # no less than num_min
     num_max_end = 10
@@ -180,10 +235,8 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     vpm_max_end = 38
     vpm_max = weight_boundray(vpm_max_start, vpm_max_end, rate)
 
-    dc_min_start = 2
-    dc_min_end = 1
-    dc_min = weight_boundray(dc_min_start, dc_min_end, rate)
-    dc_max_start = dc_min_start
+    dc_min = 1
+    dc_max_start = 2
     dc_max_end = 4
     dc_max = weight_boundray(dc_max_start, dc_max_end, rate)
 

@@ -107,9 +107,9 @@ import mpse
 iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
-    evtime = 5
-    n_pop = 1000
-    n_gen = 400
+    evtime = 3
+    n_pop = 400
+    n_gen = 800
     loop = 1000
     print("Using", format(mp.cpu_count()), "CPUs, estimated time", round(evtime*n_gen*n_pop/mp.cpu_count()*0.273558/60/60, 2), "h")
 else: # develop mode
@@ -118,9 +118,13 @@ else: # develop mode
     n_gen = 5
     loop = 10
 rate = 1
+curriculum_learning = 1
 previous_gen = -1
 start = time.time()
-case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
+if curriculum_learning == 0:
+    case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
+else:
+    case_list = [mpse.gen_case(i//evtime/n_gen) for i in range(evtime*(n_gen+1))]
 
 # case_num = 200
 # case_list = [mpse.gen_case(rate) for _ in range(case_num)]
