@@ -163,6 +163,8 @@ def surround_judge_alpha(alpha, theta):
 def gen_case(rate = 1, k = 1.9, m = 7):
     "generate random case, rate 0 to 1, simple to hard"
     #generate range assign by rate, con for constant
+    if rate > 1:
+        rate = 1
     num_min_start = 8
     num_min_end = 3
     num_min = int(round(weight_boundray(num_min_start, num_min_end, rate)))
@@ -171,7 +173,7 @@ def gen_case(rate = 1, k = 1.9, m = 7):
     r_min = 40
     r_max_start = 60
     r_max_end = 80
-    r_max = int(round(weight_boundray(r_max_start, r_max_end, rate)))
+    r_max = weight_boundray(r_max_start, r_max_end, rate)
 
     vem_value = 42
 
@@ -474,11 +476,10 @@ if __name__ == '__main__':
     ran_seed = 37 # 4 7 11 13 19 21 26 32 33 37 39
     np.random.seed(ran_seed)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    print(capture_test(func=ev_lambda_test, loop=0, pursuer=0),ev_lambda_test)
+    # print(capture_test(func=ev_lambda_test, loop=0, pursuer=0),ev_lambda_test)
     np.random.seed(ran_seed)
     ev_lambda_test = EvLambda('(tri*vpm*(maxr + stdr - vem*(dc - r)) + (avgr + r)*(dc - r))/(dc - r)')
-    print(capture_test(func=ev_lambda_test, loop=0, pursuer=0),ev_lambda_test)
-
+    # print(capture_test(func=ev_lambda_test, loop=0, pursuer=0),ev_lambda_test)
     pu_lambda_test = PuLambda('sin(adep) + 0.2')
     # print(capture_test(func=pu_lambda_test, loop=1000, pursuer=1),pu_lambda_test)
     end = time.time()

@@ -66,7 +66,7 @@ from deap import creator, base, tools
 creator.create("FitnessMin", base.Fitness, weights=(1,))  # to minimize the objective (fitness)
 creator.create("Individual", gep.Chromosome, fitness=creator.FitnessMin)
 
-h = 20 # head length
+h = 10 # head length
 n_genes = 2   # number of genes in a chromosome
 r = 8   # length of the RNC array
 
@@ -107,9 +107,9 @@ import mpse
 iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
-    evtime = 3
-    n_pop = 400
-    n_gen = 800
+    evtime = 5
+    n_pop = 800
+    n_gen = 2000
     loop = 1000
     print("Using", format(mp.cpu_count()), "CPUs, estimated time", round(evtime*n_gen*n_pop/mp.cpu_count()*0.273558/60/60, 2), "h")
 else: # develop mode
@@ -119,12 +119,15 @@ else: # develop mode
     loop = 10
 rate = 1
 curriculum_learning = 1
+curriculum_ratio = 0.75
+curriculum_gen = int(round(curriculum_ratio * n_gen)) # The gens used for learning. The gens after will use rate = 1
+
 previous_gen = -1
 start = time.time()
 if curriculum_learning == 0:
     case_list = [mpse.gen_case(rate) for _ in range(evtime*(n_gen+1))]
 else:
-    case_list = [mpse.gen_case(i//evtime/n_gen) for i in range(evtime*(n_gen+1))]
+    case_list = [mpse.gen_case(i//evtime/curriculum_gen) for i in range(evtime*(n_gen+1))]
 
 # case_num = 200
 # case_list = [mpse.gen_case(rate) for _ in range(case_num)]
@@ -160,7 +163,8 @@ hof = tools.HallOfFame(10)   # only record the best 10 individuals ever found in
 start = time.time()
 pop, log = multigep.gep_multi(pop, toolbox, n_generations=n_gen, n_elites=3, stats=stats, hall_of_fame=hof, verbose=True)
 end = time.time()
-print("time spent: {} s".format(round(end - start,2)))
+time_spent = round(end - start,2)
+print("time spent: {} s".format(time_spent), "= {} min".format(round(time_spent/60,2)), "= {} h".format(round(time_spent/3600,2)))
 
 print('\nSymplified best individual: ')
 symplified_best_list = []
