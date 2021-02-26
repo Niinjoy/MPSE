@@ -107,9 +107,9 @@ import mpse
 iteration = 1000 #maximun time iteration
 dev = 0
 if dev == 0:
-    evtime = 5
-    n_pop = 800
-    n_gen = 2000
+    evtime = 10
+    n_pop = 1000
+    n_gen = 400
     loop = 1000
     print("Using", format(mp.cpu_count()), "CPUs, estimated time", round(evtime*n_gen*n_pop/mp.cpu_count()*0.273558/60/60, 2), "h")
 else: # develop mode
@@ -118,7 +118,7 @@ else: # develop mode
     n_gen = 5
     loop = 10
 rate = 1
-curriculum_learning = 1
+curriculum_learning = 0
 curriculum_ratio = 0.75
 curriculum_gen = int(round(curriculum_ratio * n_gen)) # The gens used for learning. The gens after will use rate = 1
 

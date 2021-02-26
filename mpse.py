@@ -473,14 +473,14 @@ if __name__ == '__main__':
     #     if cap1<cap0:
     #         print(i,cap1,cap0)
 
-    ran_seed = 37 # 4 7 11 13 19 21 26 32 33 37 39
+    ran_seed = 0 # 4 7 11 13 19 21 26 32 33 37 39
     np.random.seed(ran_seed)
     ev_lambda_test = EvLambda('-(r+0)*tri/(r-dc)')
-    # print(capture_test(func=ev_lambda_test, loop=0, pursuer=0),ev_lambda_test)
+    # print(capture_test(func=ev_lambda_test, loop=1000, pursuer=0),ev_lambda_test)
     np.random.seed(ran_seed)
     ev_lambda_test = EvLambda('(tri*vpm*(maxr + stdr - vem*(dc - r)) + (avgr + r)*(dc - r))/(dc - r)')
     # print(capture_test(func=ev_lambda_test, loop=0, pursuer=0),ev_lambda_test)
-    pu_lambda_test = PuLambda('sin(adep) + 0.2')
+    pu_lambda_test = PuLambda('sin(adep) + 0.37')
     # print(capture_test(func=pu_lambda_test, loop=1000, pursuer=1),pu_lambda_test)
     end = time.time()
     print("time spent: {} s".format(round(end - start,2)))
