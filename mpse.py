@@ -52,6 +52,7 @@ def vpeq(r, alpha, theta, epsilon, vpm, m, k, dc, vem, pu_lambda):
         beta = betaeq(delta, gamma, k)
     else:
         beta = pu_lambda(abs(epsilon-down(epsilon)), r, r/((down(r)+r+up(r))/3), dc, epsilon, down(epsilon), vpm, vem, np.min(r), np.max(r), np.mean(r), np.std(r))
+        beta = np.median(np.vstack((np.zeros(len(beta)),beta,np.ones(len(beta))*np.pi)),axis=0) # set the range of beta
     sd = np.sign(epsilon - down(epsilon))
     vp = vpeq_beta(alpha, sd, vpm, beta)
     return vp
